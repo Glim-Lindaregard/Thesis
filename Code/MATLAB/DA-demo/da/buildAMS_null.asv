@@ -1,0 +1,86 @@
+function AMS = buildAMS_null(A,umin,umax, tol)
+    if nargin <4, tol = 1e-12; end
+    
+
+    NullA = null(A);
+    
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% function AMS = buildAMS_null(A, umin, umax, tol)
+% % Null-space method for constructing AMS (Tang 2011, Sec. 3.2(4))
+% %
+% %   A      : [3×m] control effectiveness matrix
+% %   umin   : [m×1] min limits
+% %   umax   : [m×1] max limits
+% %   tol    : small threshold, e.g. 1e-8
+% %
+% %   Tau        : [n×3] vertices in torque space
+% %   U_vertices : [n×m] corresponding control vertices
+% 
+% if nargin < 4, tol = 1e-8; end
+% [m_out, m] = size(A); %#ok<ASGLU>
+% 
+% % 1. All corners of control hypercube
+% U_all = full(dec2bin(0:(2^m - 1)) - '0');  % 0/1 matrix, 2^m × m
+% U_all = umin' + U_all .* (umax' - umin'); % scale to actual limits
+% 
+% % 2. Null-space basis
+% N = null(A);   % [m × (m-3)]
+% 
+% % 3. Project each U onto null space
+% proj = U_all * N;    % each row projected into null-space coordinates
+% norm_proj = sqrt(sum(proj.^2, 2));
+% 
+% % 4. Keep only points near zero projection (≈ vertices)
+% keep = norm_proj < tol;
+% 
+% U_vertices = U_all(keep, :);
+% 
+% % 5. Map to torque space
+% Tau = (A * U_vertices')';
+% 
+% % 6. Remove duplicates (within tolerance)
+% Tau = unique(round(Tau, 10), 'rows');
+% Uverts = unique(round(U_vertices, 10), 'rows');
+% 
+% 
+% 
+% 
+% facets.Uverts = Uverts;    % rows: A,B,C,D
+% facets.Tau    = Tau;       % rows: A,B,C,D
+% 
+% AMS.facets = facets;
+% AMS.num_facets_built = numel(facets);
+% end

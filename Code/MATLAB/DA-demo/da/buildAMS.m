@@ -1,0 +1,175 @@
+function AMS = buildAMS(CB, umin, umax, opts)
+% BUILDAMS_OFFLINE_TANG  Offline AMS construction (Tang FSDA style).
+% ---------------------------------------------------------------------
+% Given a 3×m effectiveness matrix CB (columns are actuator moment vectors)
+% and actuator bounds umin/umax, construct all AMS boundary facets.
+% Each facet is a parallelogram spanned by TWO "free" actuators (i,j);
+% all other actuators are LOCKED to a bound based on the scalar triple
+% product sign. For each unordered pair (i,j) there are TWO parallel
+% facets ("max" / "min") with normals ±(c_i × c_j).
+%
+% INPUTS
+%   CB    : 3×m matrix (τ = CB·u)  (CB is A*S*M but S and M is 1 for now)
+%   umin  : 1×m lower bounds
+%   umax  : 1×m upper bounds
+%   opts  : struct (optional)
+%       .tol_parallel   : skip pair (i,j) if ‖c_i×c_j‖ < tol (default 1e-12)
+%       .store_indices  : if true, store A,B,D vertex indices (default true)
+%
+% OUTPUT
+%   AMS struct with fields:
+%       .m                       : number of actuators
+%       .num_facets_expected     : m*(m-1) facets (two per unordered pair)
+%       .num_facets_built        : actual count after skipping near-parallel
+%       .facets(k) with:
+%           .pair     : [i j] free-actuator indices
+%           .type     : 'max' or 'min' (parallel opposites)
+%           .normal   : 3×1 facet normal (± cross(ci,cj))
+%           .Uverts   : 4×m control vectors at vertices (order A,B,C,DU)
+%           .Tau      : 4×3 AMS vertices τ = CB·Uverts.' (same order)
+%           .octant   : 1×3 in {−1,0,+1}; 0 means mixed signs on that axis
+%           .A_idx    : index of A in rows (1)
+%           .B_idx    : index of B in rows (2)
+%           .D_idx    : index of D in rows (4)
+%
+% CONVENTION for the four facet vertices (fixed order):
+%   A: (ui=min, uj=min)
+%   B: (ui=max, uj=min)
+%   C: (ui=max, uj=max)
+%   D: (ui=min, uj=max)
+% So AB is the "ui-edge" and AD is the "uj-edge".
+%
+% This file implements ONLY the OFFLINE geometry (facets + vertices + octant
+% tags). The ONLINE step (given τc, locate facet and recover u) is a small
+% routine that uses the stored A,B,D and solves a 3×3 system per tested facet.
+%
+% ---------------------------------------------------------------------
+% Minimal example (uncomment to quick-test):
+%{
+% CB   = randn(3,8);
+% umin = zeros(1,8); umax = ones(1,8);
+% AMS  = buildAMS_offline_Tang(CB, umin, umax);
+% fprintf('Facets built: %d (expected %d)\n', AMS.num_facets_built, AMS.num_facets_expected);
+% % quick scatter of all vertices (no hull):
+% Tau_all = vertcat(AMS.facets.Tau);
+% figure; plot3(Tau_all(:,1),Tau_all(:,2),Tau_all(:,3),'.'); grid on; axis equal;
+% title('AMS facet vertices'); xlabel('\tau_x'); ylabel('\tau_y'); zlabel('\tau_z');
+%}
+% ---------------------------------------------------------------------
+
+    % --- defaults
+    if nargin < 4 || isempty(opts), opts = struct(); end
+    if ~isfield(opts,'tol_parallel'),  opts.tol_parallel  = 1e-12; end
+    if ~isfield(opts,'store_indices'), opts.store_indices = true;  end
+
+    % --- basic checks
+    [r,m] = size(CB);
+    assert(r==3, 'CB must be 3×m.');
+    assert(isvector(umin) && isvector(umax) && numel(umin)==m && numel(umax)==m, ...
+        'umin/umax must be 1×m.');
+    umin = umin(:).'; umax = umax(:).';
+
+    % --- init AMS container
+    AMS.m = m;
+    AMS.num_facets_expected = m*(m-1);  % two per unordered pair
+    facets = struct('pair',{}, 'type',{}, 'normal',{}, 'Uverts',{}, 'Tau',{}, 'octant',{}, 'A_idx',{}, 'B_idx',{}, 'D_idx',{});
+    fcount = 0;
+
+    % --- iterate all unordered pairs (i,j), i<j
+    for i = 1:m-1
+        cbi = CB(:,i);
+        for j = i+1:m
+            cbj = CB(:,j);
+            n = cross(cbi, cbj);          % facet normal for the "max" facet
+            if norm(n) < opts.tol_parallel
+                % columns nearly parallel; skip this pair
+                fprintf("Cross product too small\n");
+                continue
+            end
+
+            % Triple-product signs for ALL columns at once: s_k = sign( n·cb_k )
+            n_dot_CB = (n.' * CB);   % 1×m row of dot products
+            s = sign(n_dot_CB);      % entries in {−1,0,+1}
+            s([i j]) = 0;            % free variables are not locked by this rule
+
+            % Two parallel facets for this pair: 'max' (+n) and 'min' (−n)
+            for which = 1:2
+                if which==1
+                    ftype  = 'max';
+                    normal =  n;
+                    choose = +1;      % use umax if choose*s_k > 0, else umin
+                else
+                    ftype  = 'min';
+                    normal = -n;
+                    choose = -1;      % inverted rule for the opposite facet
+                end
+
+                % Build a template u by LOCKING all k ≠ {i,j}
+                u_tmpl = zeros(1,m);
+                for k = 1:m
+                    if k==i || k==j, continue; end
+                    if choose * s(k) > 0
+                        u_tmpl(k) = umax(k);
+                    else
+                        u_tmpl(k) = umin(k);
+                    end
+                end
+
+                % Four vertices for (ui,uj) corners — fixed A,B,C,D order
+                Uverts = zeros(4,m);
+                % A:(min,min)
+                Uverts(1,:) = u_tmpl; Uverts(1,i) = umin(i); Uverts(1,j) = umin(j);
+                % B:(max,min)
+                Uverts(2,:) = u_tmpl; Uverts(2,i) = umax(i); Uverts(2,j) = umin(j);
+                % C:(max,max)
+                Uverts(3,:) = u_tmpl; Uverts(3,i) = umax(i); Uverts(3,j) = umax(j);
+                % D:(min,max)
+                Uverts(4,:) = u_tmpl; Uverts(4,i) = umin(i); Uverts(4,j) = umax(j);
+
+                % Map to AMS vertices τ = CB·u
+                Tau = (CB * Uverts.').';   % 4×3
+
+                % Octant tag: keep sign if ALL 4 vertices share it; else 0
+                sig  = sign(Tau);
+                same = @(col) all(sig(:,col)==sig(1,col));
+                ox = same(1)*sig(1,1); oy = same(2)*sig(1,2); oz = same(3)*sig(1,3);
+                oct = [ox oy oz];
+
+                % Store facet
+                fcount = fcount + 1;
+                %fprintf('%d \n',fcount);
+                facets(fcount).pair   = [i j];
+                facets(fcount).type   = ftype;
+                facets(fcount).normal = normal(:);
+                facets(fcount).Uverts = Uverts;    % rows: A,B,C,D
+                facets(fcount).Tau    = Tau;       % rows: A,B,C,D
+                facets(fcount).octant = oct;
+                if opts.store_indices
+                    facets(fcount).A_idx = 1;      % A,B,D indices used online
+                    facets(fcount).B_idx = 2;
+                    facets(fcount).D_idx = 4;
+                end
+            end
+        end
+    end
+
+    AMS.facets = facets;
+    AMS.num_facets_built = numel(facets);
+
+    fprintf('Facets built: %d (expected %d)\n', ... 
+    AMS.num_facets_built, AMS.num_facets_expected);
+end
+
+
+
+% ---------------------------------------------------------------------
+% Helper (optional): compute octant for an arbitrary 4×3 set of vertices.
+% Keep sign if all rows share it, else 0. Not used externally here, but
+% left as a pattern if you refactor.
+% ---------------------------------------------------------------------
+% function oct = facet_octant(Tau4)
+%     sig  = sign(Tau4);
+%     same = @(col) all(sig(:,col)==sig(1,col));
+%     ox = same(1)*sig(1,1); oy = same(2)*sig(1,2); oz = same(3)*sig(1,3);
+%     oct = [ox oy oz];
+% end
