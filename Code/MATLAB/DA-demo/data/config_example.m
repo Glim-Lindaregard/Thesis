@@ -14,7 +14,7 @@ cfg.pos  = [ +a,+a;
              +a,-a;
              +a,-a ];             % [x y] per thruster
 
-cfg.beta = [ pi/2; 0; pi/2; pi; 3*pi/2; pi; 3*pi/2; 0 ];   %Thruster angles from +x
+cfg.beta = [ pi/2; 0; pi/2; pi; 3*pi/2; pi; 3*pi/2; 0] + pi/8;   %Thruster angles from +x
 
 cfg.u_min = umin*ones(8,1);            % no reverse
 cfg.u_max = umax*ones(8,1);
