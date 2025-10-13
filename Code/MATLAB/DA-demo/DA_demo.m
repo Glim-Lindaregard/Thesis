@@ -1,6 +1,5 @@
 clear; clc; close all; 
-addpath('/home/glim/Thesis/Code/MATLAB/DA-demo/da');
-addpath('/home/glim/Thesis/Code/MATLAB/DA-demo/data');
+
 
 %--- Import model parameters (edit in config_example) ---
 cfg = config_example();
@@ -22,7 +21,7 @@ AMS_row = buildAMS(cfg.A, cfg.u_min', cfg.u_max',AMSopts);
 % --- Normalize AMS verteces ---
 %normAMS = normalizeAMS(AMS);
 
-ad = [1,0,0]';
+ad = [1,1,1]';
 ud = findUd(AMS_row,ad)
 
 fprintf("fx,fy,tau = \n")
@@ -43,8 +42,10 @@ VisOpts = struct( ...
     'Lighting', true, ...
     'ShowNormals', false ...
     );
-
+figure(1)
 visualizeAMS(AMS_row,VisOpts);
+
+figure(2)
 visualizeSlider(cfg,ud,ad);
 %visualizeAMS(AMS_row,VisOpts);
 
