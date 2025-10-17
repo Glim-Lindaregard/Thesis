@@ -1,0 +1,3 @@
+function barycentric(verts)
+
+end
