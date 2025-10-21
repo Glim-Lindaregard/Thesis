@@ -2,7 +2,7 @@ clear; clc; close all;
 
 
 %--- Import model parameters (edit in config_example) ---
-cfg = config_example();
+cfg = config();
 
 
 % --- A matrix from Tang paper ---
@@ -12,20 +12,10 @@ Atest = [
  -0.10173   0.10173  -0.10173   0.10173   0.10173  -0.10173   0.10173  -0.10173
 ];
 
+%cfg.A = Atest;
 
 %--- Construct AMS structure ---
-AMSopts = struct('tol_parallell', 1e-12, 'storeIndeces', false);
-AMS = buildAMS_null(cfg.A,cfg.u_min,cfg.u_max);
-AMS_row = buildAMS(cfg.A, cfg.u_min', cfg.u_max',AMSopts);
-%AMS_null = buildAMS_null(Atest ,-cfg.u_max, cfg.u_max);
-% --- Normalize AMS verteces ---
-%normAMS = normalizeAMS(AMS);
-
-%ad = [1,0,0]';
-%ud = findUd(AMS_row,ad)
-
-%fprintf("fx,fy,tau = \n")
-%disp(cfg.A * ud);
+AMS = buildAMS_row(cfg);
 
 %---Visualize AMS facets---
 VisOpts = struct( ...
@@ -40,14 +30,10 @@ VisOpts = struct( ...
     'GridLineStyle', '--', ...
     'UseOctantColors', false, ...
     'Lighting', true, ...
-    'ShowNormals', false ...
-    );
-%figure(1)
-%visualizeAMS(AMS_row,VisOpts);
+    'ShowNormals', true,...
+    'fps', 2); %Inverse to build speed
 
-%figure(2)
-%visualizeSlider(cfg,ud,ad);
-%visualizeAMS(AMS_row,VisOpts);
+visualizeAMS(AMS,VisOpts);
 
 
 

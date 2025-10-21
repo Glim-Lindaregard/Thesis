@@ -1,97 +1,46 @@
-function visualizeSlider(cfg, ud,ad)
-% VISUALIZESLIDER  Draw the square "slider" and active thruster arrows.
-% -------------------------------------------------------------------------
-% INPUTS
-%   cfg.a     : half side-length of the slider square (meters)
-%   cfg.pos   : 8×2 thruster positions [x_i, y_i] (meters)
-%   cfg.beta  : 8×1 thruster pointing angles (radians, 0 = +x, pi/2 = +y)
-%   ud        : 8×1 thrust command for each thruster (e.g., 0 or 0.7 N)
-%
-% Behavior
-%   - Draws a square from [-a,+a] × [-a,+a].
-%   - Draws small markers at each thruster location.
-%   - For each ud(i) > 0, draws an arrow starting at cfg.pos(i,:) pointing
-%     along cfg.beta(i) with length proportional to ud(i).
-%
-% Example:
-%   cfg.a = 0.20;
-%   cfg.pos  = [ +cfg.a,+cfg.a;
-%                +cfg.a,+cfg.a;
-%                -cfg.a,+cfg.a;
-%                -cfg.a,+cfg.a;
-%                -cfg.a,-cfg.a;
-%                -cfg.a,-cfg.a;
-%                +cfg.a,-cfg.a;
-%                +cfg.a,-cfg.a ];
-%   cfg.beta = [ pi/2; 0; pi/2; pi; 3*pi/2; pi; 3*pi/2; 0 ];
-%   ud = [0.7;0;0.7;0;0;0.7;0;0.7];
-%   visualizeSlider(cfg, ud);
+function visualizeSlider(cfg, ud)
+a = cfg.a; pos = cfg.pos; beta = cfg.beta(:);
+ud = ud(:);
 
-% assert(isfield(cfg,'a') && isfield(cfg,'pos') && isfield(cfg,'beta'), ...
-%     'cfg must contain fields a, pos, beta');
-% assert(numel(ud)==8 && size(cfg.pos,1)==8 && numel(cfg.beta)==8, ...
-%     'Expect 8 thrusters: pos 8x2, beta 8x1, ud 8x1');
+A = [cos(beta)'; ...
+     sin(beta)'; ...
+     (pos(:,1)'.*sin(beta)' - pos(:,2)'.*cos(beta)')];
 
-a = 0.2; %cfg.a;
-pos = cfg.pos;
-beta = cfg.beta(:) + pi;
+y = A*ud; f = y(1:2); tau = y(3);
 
-% Figure/axes
-cla reset; figure(gcf); hold on; grid on; axis equal
-xlim([-1.2*a, 1.2*a]); ylim([-1.2*a, 1.2*a]);
-xlabel('x [m]'); ylabel('y [m]');
-title('Slider & Active Thrusters');
+cla; hold on; axis equal
+xlim([-1.2*a 1.2*a]); ylim([-1.2*a 1.2*a])
+rectangle('Position',[-a -a 2*a 2*a])
+plot(pos(:,1),pos(:,2),'ko','MarkerFaceColor',[0.8 0.8 0.8])
 
-% Draw square body
-rectangle('Position',[-a,-a,2*a,2*a], 'Curvature',0, ...
-          'LineWidth',1.5, 'EdgeColor',[0 0 0]);
-
-% Draw thruster markers (all)
-plot(pos(:,1), pos(:,2), 'ko', 'MarkerFaceColor',[0.8 0.8 0.8], 'MarkerSize',6);
-
-% Arrow scale: map max(ud) to some fraction of the square size
-u_max = max(ud);             % handles {0, 0.7}; safe if all zeros
-if u_max <= 0
-    % Nothing active; still label thrusters
-    for i = 1:8
-        text(pos(i,1), pos(i,2), sprintf('  %d',i), 'VerticalAlignment','middle');
+um = max(ud); if um<=0, um=1; end
+Lmax = 0.5*a;
+for i = 1:length(ud)
+    if ud(i) > 0
+        d = [cos(beta(i)) sin(beta(i))];
+        L = Lmax*(ud(i)/um);
+        quiver(pos(i,1), pos(i,2), L*d(1), L*d(2), 0, 'MaxHeadSize',0.8, 'Color',[0.3 0.8 0.3])
     end
-    hold off; return
-end
-arrow_len_max = 0.5*a;       % longest arrow length relative to square size
-
-% Draw active thruster arrows
-for i = 1:8
-    ui = ud(i);
-    if ui > 0
-        dir = [cos(beta(i)), sin(beta(i))];   % unit vector
-        L = arrow_len_max * (ui / u_max);     % proportional length
-        quiver(pos(i,1), pos(i,2), L*dir(1), L*dir(2), 0, ...
-               'LineWidth', 2, 'MaxHeadSize', 0.8);
-    end
-    % Light label for index
-    text(pos(i,1), pos(i,2), sprintf('  %d',i), 'VerticalAlignment','middle');
 end
 
+sf = (0.6*a)/max(norm(f), eps);
+quiver(0,0, sf*f(1), sf*f(2), 0, 'LineWidth',2, 'Color','r', 'MaxHeadSize',1.0)
 
-% ----- Center arrow for [fx, fy, tau] -----
-fx = ad(1); fy = ad(2); tau = 1;
-f = [fx, fy];
-f_norm = norm(f);
-
-if f_norm > 0 && ~isnan(f_norm)
-    dirF = f / f_norm;              % direction of force
-    Ltau = abs(tau);                % requested length = |tau|
-    % Map |tau| to a plot length so it fits near the square.
-    % You can tweak 'tau_to_plot_scale' to taste or replace with a known max.
-    tau_to_plot_scale = (0.5*a) / (Ltau + (Ltau==0));  % simple auto-fit
-    Lplot = Ltau * tau_to_plot_scale;
-
-    quiver(0, 0, Lplot*dirF(1), Lplot*dirF(2), 0, ...
-           'LineWidth', 2, 'MaxHeadSize', 1.0);
-    % Small annotation
-    text(0, 0, '  [fx,fy], |tau|', 'HorizontalAlignment','left', 'VerticalAlignment','bottom');
+R = 0.7*a;
+tau_scale = a*sum(abs(ud));
+ang = min(2*pi, abs(tau)/max(tau_scale,eps)*2*pi);
+if ang > 0
+    sgn = sign(tau); if sgn==0, sgn=1; end
+    t = linspace(0, sgn*ang, 100);
+    x = R*cos(t); y = R*sin(t);
+    plot(x, y, 'm-', 'LineWidth',2)
+    te = sgn*ang;
+    tv = R*[-sin(te); cos(te)]; tv = tv / max(norm(tv),eps);
+    quiver(R*cos(te), R*sin(te), 0.1*a*tv(1), 0.1*a*tv(2), 0, 'Color','m', 'MaxHeadSize',1.2)
 end
 
 hold off
+
+fprintf('Resultant vector [Fx, Fy, Tau] = [%.3f, %.3f, %.3f]\n', f(1), f(2), tau);
+
 end

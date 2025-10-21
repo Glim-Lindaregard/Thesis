@@ -1,3 +1,6 @@
-function assembleAMS(verts)
+% function AMS = assembleAMS(cfg)
+% 
+% end
 
-end
+
+%%% MIGHT USE?
