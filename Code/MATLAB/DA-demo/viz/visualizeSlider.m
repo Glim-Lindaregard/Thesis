@@ -8,6 +8,7 @@ A = [cos(beta)'; ...
 
 y = A*ud; f = y(1:2); tau = y(3);
 
+figure;
 cla; hold on; axis equal
 xlim([-1.2*a 1.2*a]); ylim([-1.2*a 1.2*a])
 rectangle('Position',[-a -a 2*a 2*a])
@@ -41,6 +42,6 @@ end
 
 hold off
 
-fprintf('Resultant vector [Fx, Fy, Tau] = [%.3f, %.3f, %.3f]\n', f(1), f(2), tau);
+%fprintf('Resultant vector [Fx, Fy, Tau] = [%.3f, %.3f, %.3f]\n', f(1), f(2), tau);
 
 end
