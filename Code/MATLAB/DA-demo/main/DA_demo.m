@@ -16,8 +16,8 @@ Atest = [
 
 
 
-ad = [1,0,0]';
-AMS = buildAMS_row(cfg);
+ad = [1,0.5,0.3]';
+AMS = buildAMS_row();
 [U,index,abc] = findUfromAd_DA(ad, AMS);
 
 aProduced = cfg.A*U;
@@ -50,7 +50,7 @@ VisOpts = struct( ...
     'Index', index, ...
     'ShowProduced', true,...
     'ShowDesired', true,...
-    'ShowBasis', false);
+    'ShowBasis', true);
 
 
 visualizeAMS(AMS,VisOpts,aProduced,ad,abc);

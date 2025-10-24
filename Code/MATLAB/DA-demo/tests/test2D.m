@@ -1,4 +1,4 @@
-function  test2D(Null)
+function  test2D()
 
 
 %% --- Data setup ---

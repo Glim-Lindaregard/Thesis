@@ -1,13 +1,23 @@
 function AMS = buildAMS_row(cfg)
-%Assign cfg variables etc
+
 A = cfg.A; umin = cfg.u_min; umax = cfg.u_max;
-m = cfg.m; t = 0;
-tol = 1e-14;
+N = cfg.N;  t = 0; tol = 1e-14;
+
+% Pre-calculate maximuNnumber of facets
+% Each pair (i,j) generates 2 facets, total pairs = m*(m-1)/2
+maxFacets = N* (N-1); % Conservative estimate
+
+% Pre-allocate AMS structure with maximuNsize
+facetTemplate = struct('U', zeros(N, 4), 'V', zeros(3, 4), 'norms', zeros(1, 3));
+AMS.facets = repmat(facetTemplate, maxFacets, 1);
+AMS.center = zeros(3, 1);
+
+
 
 % --- Pics all unique combinations of A columns ---
-for i = 1:m-1
-    for j = i+1:m
-    % --- Straight from Tang paper ---
+for i = 1:N-1
+    for j = i+1:N
+    % --- Straight froNTang paper ---
     Asub = A(:,[i j]);
 
     [A1, dropRow] = bestSubMatrix(Asub);  %Find the best conditioned 2x2 sub of Asub. 
@@ -20,14 +30,14 @@ for i = 1:m-1
     n(abs(n) < tol) = 0;
     if norm(n) < tol
         % columns nearly parallel; skip this pair
-        frpintf("Cross product too small");
+        fprintf("Cross product too small");
         continue
     end
 
     % --- For each pair, generate facet vertices ---
     ss = (n.'*A); 
-    s = zeros(1,m);
-    for l = 1:m
+    s = zeros(1,N);
+    for l = 1:N
         if (ss(l) < tol) && (ss(l) > -tol)
             s(l) = 0;
         elseif ss(l) < -tol
@@ -66,11 +76,13 @@ for i = 1:m-1
         end
     end
 end
+
+AMS.facets = AMS.facets(1:t);  %Removes ununsed preallocated spots.
 AMS.center = findCenter(AMS);
 end
 
-%Helper to find best conditioned 2x2 matrix
-function [A1, dropRow] = bestSubMatrix(Asub)
+%HFind best conditioned 2x2 matrix
+function [A1, dropRow] = bestSubMatrix(Asub)  %AS SLOP
     c = zeros(3,1);
     for l = 1:3
         Atemp = Asub(setdiff(1:3,l), :);
@@ -80,12 +92,14 @@ function [A1, dropRow] = bestSubMatrix(Asub)
     A1 = Asub(setdiff(1:3, dropRow), :)';
 end
 
+
+%Find center of AMS
 function center = findCenter(AMS)
-
-
-%ENABLE IS CONTER OF AMS IS NOT  0 0 0, or set center to known center.
-for j = 1:numel(AMS.facets)
-    faceCenter(:,j) = mean(AMS.facets(j).V,2);
-end
-center = mean(faceCenter,2);
+    numFacets = numel(AMS.facets);
+    faceCenter = zeros(3, numFacets);
+    
+    for j = 1:numFacets
+        faceCenter(:,j) = mean(AMS.facets(j).V, 2);
+    end
+    center = mean(faceCenter, 2);
 end

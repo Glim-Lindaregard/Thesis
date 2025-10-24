@@ -1,9 +1,14 @@
 function cfg = config()
-% Define parameters for the configuration
-% a: half side-length, umax: max thrust per jet [N], e.g., a=0.20; umax=0.7;
-a = 0.2; 
-umax = 0.7;
-umin = 0;
+% Define parameters 
+cfg = struct();
+
+cfg.N = 0;
+cfg.beta = zeros(8,1);
+
+
+cfg.u_max = 0.7*ones(8,1);      %Max thruster outputs [N]
+cfg.u_min = zeros(8,1);         %Min thruster outputs [N]
+a = 0.2;
 cfg.pos  = [ +a,+a;
              +a,+a;
              -a,+a;
@@ -11,30 +16,28 @@ cfg.pos  = [ +a,+a;
              -a,-a;
              -a,-a;
              +a,-a;
-             +a,-a ];             % [x y] per thruster
+             +a,-a ];           %Thruster positions [x y] per thruster [m]
+cfg.a = a;                      %Length from body center to edge [m]
 
-% cfg.pos  = [ +a,+a;
-%              +a,+a;
-%              -a,+a;
-%              -a,+a];  
+cfg.N = length(cfg.pos(:,1));   %Number of thrusters
 
-m = length(cfg.pos(:,1)); %nr thrusters
+cfg.beta = [ 3*pi/2; 
+                  pi; 
+                   0; 
+              3*pi/2; 
+                pi/2; 
+                   0; 
+                  pi; 
+                pi/2 ];         %Thruster angles from +x [radians]
 
-%cfg.beta = [ pi/2; 0; pi/2; pi; 3*pi/2; pi; 3*pi/2; 0] + pi;   %Thruster angles from +x
-cfg.beta = [ 3*pi/2; pi; 0; 3*pi/2; pi/2; 0; pi; pi/2];   %Thruster angles from +x
-%cfg.beta = [ 3*pi/2; pi; 0; 3*pi/2];
-cfg.u_min = umin*ones(m,1);
-cfg.u_max = umax*ones(m,1);
-cfg.a = a;
-cfg.m = m;
 
-% Build A
-A = zeros(3,m);
-for i=1:m
+% Build A matrix
+A = zeros(3,cfg.N);
+for i=1:cfg.N
     bx = cfg.beta(i);  c = cos(bx); s = sin(bx);
     rx = cfg.pos(i,1); ry = cfg.pos(i,2);
     A(:,i) = [ c; s; rx*s - ry*c ];
 end
-cfg.A = A;  %Reverse force verctors so thr thrusters puch and not pull
+cfg.A = A;
 
 end

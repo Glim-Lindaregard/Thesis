@@ -26,7 +26,7 @@ function limitTestAMS(cfg)
         %--- Construct AMS structure ---
         ad = ads(i,:)';
         
-        m = cfg.m;
+        m = cfg.N;
         AMS = buildAMS_row(cfg);
     
         if numel(AMS.facets) ~= m^2 -m
