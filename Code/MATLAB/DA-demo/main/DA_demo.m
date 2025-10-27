@@ -17,7 +17,7 @@ Atest = [
 
 
 ad = [1,0.5,0.3]';
-AMS = buildAMS_row();
+AMS = buildAMS_row(cfg);
 [U,index,abc] = findUfromAd_DA(ad, AMS);
 
 aProduced = cfg.A*U;

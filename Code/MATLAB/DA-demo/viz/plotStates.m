@@ -1,26 +1,22 @@
 function plotStates(simout, ref)
-% PLOTSLIDERTRAJECTORY  Plot x, y, theta vs constant reference values
-%
-% Usage:
-%   plotSliderTrajectory(simout, [x_ref; y_ref; theta_ref])
-%
-% Extracts pose data from simout.logsout ('state') using the same
-% logic as animateSliderTrajectory, then plots x/xref, y/yref,
-% and theta/theta_ref in a 3×1 grid.
 
-    % --- Extract pose (same as your animate function) ---
+    % --- Extract states ---
     logs = simout.logsout;
-    state_ts = logs.get('state').Values;
-    t_state  = state_ts.Time;
-    X        = state_ts.Data;    % could be N×3 or 3×N depending on block
+    State = logs.get('State').Values;
+    t_state  = State.Time;
+    X        = State.Data;
 
-    if size(X,2)==3
-        x = X(:,1); y = X(:,2); th = X(:,3);
-    elseif size(X,1)==3
-        x = X(1,:).'; y = X(2,:).'; th = X(3,:).';
-    else
-        error('Logged ''state'' must have width 3. Got size %s.', mat2str(size(X)));
-    end
+
+    x = X(:,1); y = X(:,2); th = X(:,3);
+    vx = X(:,4);  vy = X(:,5);  w = X(:,6);
+
+    
+    ct = cos(th); st = sin(th);
+    
+    % rotate body-frame velocities to world frame
+    xdot =  ct.*vx - st.*vy;
+    ydot =  st.*vx + ct.*vy;
+
 
     t = seconds(t_state - t_state(1));   % time vector starting at 0 s
 
@@ -28,10 +24,13 @@ function plotStates(simout, ref)
     xref  = ref(1) * ones(size(x));
     yref  = ref(2) * ones(size(y));
     thref = ref(3) * ones(size(th));
+    xdotref = ref(4) * ones(size(xdot));
+    ydotref = ref(5) * ones(size(ydot));
+    wref  = ref(6) * ones(size(w));
 
-    % --- 3×1 grid of plots ---
-    figure('Name','States tracking','Color',[0.2 0.2 0.2]);
-    tiledlayout(3,1,'TileSpacing','compact','Padding','compact');
+    % --- 3×2 grid of plots ---
+    figure('Name','State tracking','Color',[0.2 0.2 0.2]);
+    tiledlayout(3,2,'TileSpacing','compact','Padding','compact');
 
     % x vs xref
     nexttile;
@@ -39,11 +38,23 @@ function plotStates(simout, ref)
     plot(t, xref, '--', 'LineWidth', 1.2, 'DisplayName','x_{ref}');
     grid on; ylabel('x [m]'); legend('Location','best'); title('x tracking');
 
+    % xdot vs xref
+    nexttile;
+    plot(t, xdot, '-', 'LineWidth', 1.4, 'DisplayName','x velocity'); hold on;
+    plot(t, xdotref, '--', 'LineWidth', 1.2, 'DisplayName','xdot_{ref}');
+    grid on; ylabel('xdot [m/s]'); legend('x velocity','xdot_{ref}'); title('xdot tracking');
+
     % y vs yref
     nexttile;
     plot(t, y, '-', 'LineWidth', 1.4, 'DisplayName','y'); hold on;
     plot(t, yref, '--', 'LineWidth', 1.2, 'DisplayName','y_{ref}');
     grid on; ylabel('y [m]'); legend('Location','best'); title('y tracking');
+
+    % ydot vs yref
+    nexttile;
+    plot(t, ydot, '-', 'LineWidth', 1.4, 'DisplayName','y velocity'); hold on;
+    plot(t, ydotref, '--', 'LineWidth', 1.2, 'DisplayName','ydot_{ref}');
+    grid on; ylabel('ydot [m/s]'); legend('y velocity','ydot_{ref}'); title('ydot tracking');
 
     % theta vs thetaref
     nexttile;
@@ -51,5 +62,12 @@ function plotStates(simout, ref)
     plot(t, thref, '--', 'LineWidth', 1.2, 'DisplayName','\theta_{ref}');
     grid on; ylabel('\theta [rad]'); xlabel('Time [s]');
     legend('Location','best'); title('\theta tracking');
+
+    % omega vs thetaref
+    nexttile;
+    plot(t, w, '-', 'LineWidth', 1.4, 'DisplayName','\omega'); hold on;
+    plot(t, wref, '--', 'LineWidth', 1.2, 'DisplayName','\omega_{ref}');
+    grid on; ylabel('\omega [rad/s]'); xlabel('Time [s]');
+    legend('\omega','\omega_{ref}'); title('\omega tracking');
 
 end
