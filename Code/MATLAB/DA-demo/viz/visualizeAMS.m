@@ -1,4 +1,4 @@
-function visualizeAMS(AMS, opts,aProduced,ad,abc)
+function visualizeAMS(U,Asys,norms,opts,aProduced,ad,abc)
 
 %   --- Options ---
 if nargin<2, opts=struct(); end
@@ -21,8 +21,11 @@ ShowProduced        = getfield_with_default(opts,'ShowProduced',true);
 ShowDesired         = getfield_with_default(opts,'ShowDesired',true);
 ShowBasis           = getfield_with_default(opts,'ShowBasis',true);
 
+lgHandles = [];
+lgLabels  = {};
+
 figure('Color',BackgroundColor); hold on
-count = numel(AMS.facets);
+count = size(U,3);
 
 scale = 2;
 
@@ -34,8 +37,11 @@ center = [0 0 0]; %AMS.center;
 
 for k = 1:count
     %Get a facets verteces.
-    verts = AMS.facets(k).V;
-    
+    Uk = U(:,:,k);
+    Vk = Asys*Uk;
+    verts = Vk;
+
+
     %extract verteces
     A = verts(:,1)'; B = verts(:,2)'; C = verts(:,3)'; D = verts(:,4)';
     
@@ -83,45 +89,47 @@ for k = 1:count
     
     %Show normals
     if ShowNormals
-        n = AMS.facets(k).norms;
+        n = norms(:,:,k);
         ctr = mean(verts,2);
         %Make sure normals point in "correct" direction
         if dot(ctr-center,n)<0
             n = -n;
         end
-        quiver3(ctr(1),ctr(2),ctr(3),0.2*n(1),0.2*n(2),0.2*n(3), ...
+        normHandle  = quiver3(ctr(1),ctr(2),ctr(3),0.2*n(1),0.2*n(2),0.2*n(3), ...
         'AutoScale','off','Color','r','LineWidth',1.5,'MaxHeadSize',...
         0.8,'HandleVisibility','off');
+
+        lgHandles(end+1) = normHandle;
+        lgLabels{end+1}  = 'Face normals';
     end
 end
+
+
 
 if ShowProduced
     producedHandle = quiver3(center(1),center(2),center(3),1*aProduced(1),1*aProduced(2),1*aProduced(3)...
     ,'off','Color','b','LineWidth',1.5,'MaxHeadSize',0.8);
+
+    lgHandles(end+1) = producedHandle;
+    lgLabels{end+1}  = 'Moment produced';
 end
 
 if ShowDesired
     desiredHandle = quiver3(center(1),center(2),center(3),1*ad(1),1*ad(2),1*ad(3)...
     ,'off','Color','g','LineWidth',0.5,'MaxHeadSize',0.8);
+
+    lgHandles(end+1) = desiredHandle;
+    lgLabels{end+1}  = 'Desired moment';
 end
 
 if ShowBasis
-    V   = AMS.facets(index).V;
-    adi = V(:,1);
-    adj = V(:,2);
-    adk = V(:,4);
-
-
+    Vi = Asys*U(:,:,index);
+    adi = Vi(:,1);
+    adj = Vi(:,2);
+    adk = Vi(:,4);
             
     a = abc(1); b = abc(2); c = abc(3);
-    
-    % fprintf("a = %d \nb = %d \nc = %d \n",a,b,c);
-    %             fprintf("adi = \n")
-    %             disp(adi)
-    %             fprintf("adj - adi = \n")
-    %             disp(adj-adi);
-    %             fprintf("adk - adi = \n")
-    %             disp(adk - adi);
+   
     
     M = [adi,  b*(adj-adi),  c*(adk - adi)]; 
     M2 = [adi-center' adj adk];
@@ -129,13 +137,19 @@ if ShowBasis
 
 
     for n = 1:3
-        quiver3(center(1),center(2),center(3), M2(1,n), M2(2,n), M2(3,n), ...
-            'AutoScale','off','Color',[0,0,n*0.33],'LineWidth',1.5,'MaxHeadSize',0.8);
-        % quiver3(adi(1),adi(2),adi(3), M(1,n), M(2,n), M(3,n), ...
-        %     'AutoScale','off','Color',[0,0,n*0.33],'LineWidth',1.5,'MaxHeadSize',0.8);
+        adi_adj_adk = quiver3(center(1),center(2),center(3), M2(1,n), M2(2,n), M2(3,n), ...
+            'AutoScale','off','Color',[0,n*0.33,n*0.33],'LineWidth',1.5,'MaxHeadSize',0.8);
+
+        facetBasisVectors = quiver3(adi(1),adi(2),adi(3), M(1,n), M(2,n), M(3,n), ...
+            'AutoScale','off','Color',[1,0.22,0],'LineWidth',1.5,'MaxHeadSize',0.8);
+
+        if n == 3
+            lgHandles(end+1) = adi_adj_adk;
+            lgLabels{end+1}  = 'adi adj adk';
     
-        % quiver3(center(1),center(2),center(3), M2(1,n), M2(2,n), M2(3,n), ...
-        %     'AutoScale','off','Color',[n*0.3,0,0],'LineWidth',1.5,'MaxHeadSize',0.8);
+            lgHandles(end+1) = facetBasisVectors;
+            lgLabels{end+1}  = 'Facet basis vectors';
+        end
     end
 end
 
@@ -154,14 +168,9 @@ lbl = getfield_with_default(opts,'AxisLabels',{'F_{x} (N)','F_{y} (N)','T_{z} (N
 xlabel(lbl{1}); ylabel(lbl{2}); zlabel(lbl{3});
 title('Attainable Moment Set');
 
-if ShowDesired && ShowProduced
-    legend([producedHandle,desiredHandle],'moment produced','desired moment')
-elseif ShowDesired
-    legend(desiredHandle, 'moment produced');
-elseif ShowProduced
-    legend(producedHandle,'desired moment')
+if ~isempty(lgHandles)
+    legend(lgHandles,lgLabels{:});
 end
-
 
 %Fance lights
 if LightingOn

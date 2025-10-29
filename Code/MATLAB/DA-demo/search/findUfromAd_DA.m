@@ -1,7 +1,7 @@
-function [uOut,index,x] = findUfromAd_DA(ad , AMS)
+function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
     found = 0; k = 0;
     tol = 1e-15;
-    N = size(AMS.facets(1).U, 1);
+    N = size(A,2);
 
     % Initialize all outputs at the start
     uOut = zeros(N, 1);
@@ -9,7 +9,10 @@ function [uOut,index,x] = findUfromAd_DA(ad , AMS)
     x = zeros(3, 1);
     while ~found
         k = k+1;
-        if k == numel(AMS.facets)  + 1
+        Uk = U(:,:,k);
+        Vk = A*Uk;
+
+        if k == size(U,3)  + 1
             %fprintf("No such moment possible\n")
             uOut = zeros(N,1);
             found = 1;
@@ -17,11 +20,10 @@ function [uOut,index,x] = findUfromAd_DA(ad , AMS)
             x = 0 * ones(3,1);
             continue;
         end
-        V   = AMS.facets(k).V;
 
-        adi = V(:,1);
-        adj = V(:,2);
-        adk = V(:,4);
+        adi = Vk(:,1);
+        adj = Vk(:,2);
+        adk = Vk(:,4);
 
   
         M = [ad,  adi - adj,  adi - adk]; 
@@ -37,10 +39,10 @@ function [uOut,index,x] = findUfromAd_DA(ad , AMS)
         a = x(1); b = x(2); c = x(3);
 
         if a >= 0 && b >= 0 && c >= 0 && b <= 1 && c <= 1
-            U = AMS.facets(k).U;
-            ui = U(:,1);
-            uj = U(:,2);
-            uk = U(:,4);
+
+            ui = U(:,1,k);
+            uj = U(:,2,k);
+            uk = U(:,4,k);
             uStar = ui + b*(uj-ui) + c*(uk-ui);
             if a >= 1
                 uOut = uStar / a;

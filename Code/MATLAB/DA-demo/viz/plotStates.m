@@ -14,8 +14,10 @@ function plotStates(simout, ref)
     ct = cos(th); st = sin(th);
     
     % rotate body-frame velocities to world frame
-    xdot =  ct.*vx - st.*vy;
-    ydot =  st.*vx + ct.*vy;
+    % xdot =  ct.*vx - st.*vy;
+    % ydot =  st.*vx + ct.*vy;
+
+    xdot = vx; ydot = vy;
 
 
     t = seconds(t_state - t_state(1));   % time vector starting at 0 s

@@ -1,6 +1,7 @@
-function animateTrajectory(simout, ref, opts)
+function animateTrajectory(simout, ref, opts,broken)
 % AI made this but it seems to work
-
+    if nargin < 4 || isempty(broken), broken = 0; end
+    if ~isfield(opts,'broken_len'), opts.broken_len = 1.0; end 
 
     if nargin < 3 || isempty(opts), opts = struct(); end
     if ~isfield(opts,'tol_u'),        opts.tol_u      = 1e-6;      end
@@ -8,6 +9,8 @@ function animateTrajectory(simout, ref, opts)
     if ~isfield(opts,'saveVideo'),    opts.saveVideo  = false;     end
     if ~isfield(opts,'videoName'),    opts.videoName  = 'slider_traj.mp4'; end
     if ~isfield(opts,'simSpeed'),    opts.simSpeed  = 1; end
+
+
 
     % --- setup / logs ---
     cfg    = config();
@@ -69,6 +72,11 @@ function animateTrajectory(simout, ref, opts)
     headLen  = 1.0*body_r;
     hHeading = quiver(NaN,NaN,NaN,NaN,0,'LineWidth',1.5,'MaxHeadSize',2.5,'Color',[0.3 0.6 1.0]);
 
+    hBroken = quiver(NaN,NaN,NaN,NaN,0, ...
+    'LineWidth',1.8,'MaxHeadSize',2.5,'Color',[0.9 0.2 0.2], ...
+    'HandleVisibility','off','Visible','off');
+
+
     legend([trace, hQuiv(1)], {'trajectory','active thruster'}, 'TextColor',[0.95 0.95 0.95], 'Location','best');
 
     % Video?
@@ -108,6 +116,19 @@ function animateTrajectory(simout, ref, opts)
         dir_w   = (R*dir_l.').';                   % world dirs
         L       = opts.arrow_scale * uf;           % signed length
         Ux      = dir_w(:,1).*L;  Uy = dir_w(:,2).*L;
+
+        if broken > 0 && broken <= 8
+            % constant length (scaled by body radius)
+            Lb  = opts.broken_len * body_r;
+            bx  = thr_w(broken,1);  by = thr_w(broken,2);
+            bUx = dir_w(broken,1) * Lb;
+            bUy = dir_w(broken,2) * Lb;
+        
+            set(hBroken,'XData',bx,'YData',by,'UData',bUx,'VData',bUy,'Visible','on');
+        else
+            set(hBroken,'Visible','off');
+        end
+
 
         for i = 1:8
             set(hQuiv(i), 'XData',thr_w(i,1), 'YData',thr_w(i,2), ...
@@ -155,11 +176,14 @@ function [hBody, hPts, hQuiv] = createGraphics(r)
                   'EdgeColor', 0.3*[1 1 1], 'LineWidth', 1.0);
     hPts  = plot(NaN,NaN,'k.','MarkerSize',12);
     hQuiv = gobjects(8,1);
+
     for i = 1:8
         hQuiv(i) = quiver(NaN,NaN,NaN,NaN,0, ...
                           'LineWidth',1.6, 'MaxHeadSize',2.5, ...
                           'Color',[0.2 0.8 0.2], 'Visible','off');
     end
+
+
 end
 
 function updateCircle(h, c, r)

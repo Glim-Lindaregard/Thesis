@@ -16,11 +16,11 @@ Atest = [
 
 
 
-ad = [1,0.5,0.3]';
-AMS = buildAMS_row(cfg);
-[U,index,abc] = findUfromAd_DA(ad, AMS);
+ad = [1,1,0]';
+[U,A,norms,center] = Copy_of_buildAMS_row(cfg);
+[Uout,index,abc] = findUfromAd_DA(ad,U,A);
 
-aProduced = cfg.A*U;
+aProduced = A*Uout;
 
 fprintf("The desired moment was: %d %d %d \n",ad(1),ad(2),ad(3));
 
@@ -28,7 +28,7 @@ fprintf("The desired moment was: %d %d %d \n",ad(1),ad(2),ad(3));
 fprintf("And the produced moment is: %d %d %d \n",aProduced(1),aProduced(2),aProduced(3));
 
 fprintf("This was done using:\n");
-fprintf(" %.2f\n",U');
+fprintf(" %.2f\n",Uout');
 
 
 %---Visualize AMS facets---
@@ -53,9 +53,9 @@ VisOpts = struct( ...
     'ShowBasis', true);
 
 
-visualizeAMS(AMS,VisOpts,aProduced,ad,abc);
+visualizeAMS(U,A,norms,VisOpts,aProduced,ad,abc);
 
-%visualizeSlider(cfg,U);
+visualizeSlider(cfg,Uout);
 
 
 
