@@ -154,7 +154,13 @@ lbl = getfield_with_default(opts,'AxisLabels',{'F_{x} (N)','F_{y} (N)','T_{z} (N
 xlabel(lbl{1}); ylabel(lbl{2}); zlabel(lbl{3});
 title('Attainable Moment Set');
 
-legend([producedHandle,desiredHandle],'moment produced','desired moment')
+if ShowDesired && ShowProduced
+    legend([producedHandle,desiredHandle],'moment produced','desired moment')
+elseif ShowDesired
+    legend(desiredHandle, 'moment produced');
+elseif ShowProduced
+    legend(producedHandle,'desired moment')
+end
 
 
 %Fance lights
