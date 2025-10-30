@@ -5,8 +5,9 @@ cfg0  = config();
 m     = size(cfg0.A,2);                  % should be 8
 
 U0 = Copy_of_buildAMS_row(cfg0);
-uCashe(9).U = U0;
-uCashe(9).A = cfg0.A;
+
+uCashe(m+1).U = U0;
+uCashe(m+1).A = cfg0.A;
 
 % Single-failures
 for i = 1:m 
@@ -23,16 +24,16 @@ end
 
 
 broken = 5;
-failureTime = 0;
+failureTime = 2;
 
-simTime = 20;
+simTime = 10;
 
-ref = [0,5,pi/2,0,0,0]';
+ref = [0,5,pi,0,0,0]';
 
-init = [0 0 pi/2 0 0 0];
+init = [0 0 0 0 0 0];
 
 % Constants
-m    = 4.436; % [kg]
+mass    = 4.436; % [kg]
 I_zz = 1.092; % [kgm^2]
 
 
@@ -48,6 +49,14 @@ ki = diag([0.05 0.05 0.064]);
 % --- run ---
 simout = sim('sliderSim');
 
+m = size(cfg0.A,2);
+assert(ismember(broken,1:m+1),'broken must be 1..m+1');
+
+A_used   = uCashe(broken).A;
+zeroCols = find(all(abs(A_used)<1e-12,1));   % which thruster(s) are zeroed
+disp(struct('broken',broken,'zeroed_columns',zeroCols))
+
+
 
 %Visualizion
 if 1
@@ -56,7 +65,7 @@ if 1
     AniOpts.videoName = 'sliderAnimation.mp4';
     AniOpts.simSpeed = 200;
 
-    animateTrajectory(simout,ref,AniOpts,7);
+    animateTrajectory(simout,ref,cfg0,AniOpts,broken,failureTime);
     
     plotStates(simout,ref);
     
@@ -87,14 +96,4 @@ if 1
     %visualizeAMS(AMS_current,AMSopts);
 
     %visualizeSlider(cfg,U);
-end
-
-
-%Helper functions
-function result = isHealthy(mask,i)
-    result = bitget(mask,i);
-end
-
-function mask = setBroken(mask,i)
-    mask = bitset(mask,i,0);
 end

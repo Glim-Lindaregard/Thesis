@@ -12,7 +12,7 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
         Uk = U(:,:,k);
         Vk = A*Uk;
 
-        if k == size(U,3)  + 1
+        if k == size(U,3)
             %fprintf("No such moment possible\n")
             uOut = zeros(N,1);
             found = 1;
