@@ -12,7 +12,7 @@ Uverts = [0 0 0 0 1 1 1 1;   % u1
 
 ad = [-2 -1]';
 
-%visualize2D(Uverts,A);
+visualize2D(Uverts,A);
 search2D(ad,Uverts,A);
 
 
@@ -30,21 +30,21 @@ K2 = convhull(X, Y);
 K3 = convhull(Uverts(1,:)', Uverts(2,:)', Uverts(3,:)');
 
 % --- Plot setup ---
-figure('Color','k'); hold on; axis equal; grid on; view(3);
-set(gca,'Color','k','XColor','w','YColor','w','ZColor','w');
+figure('Color','w'); hold on; axis equal; grid off; view(3);
+set(gca,'Color','w','XColor','w','YColor','w','ZColor','w');
 xlabel('u_1'); ylabel('u_2'); zlabel('u_3');
-title('Control Space (3D) and AMS Projection','Color','w');
+%title('Control Space (3D) and AMS Projection','Color','k');
 
 % --- Plot shaded control-space geometry ---
 trisurf(K3, Uverts(1,:), Uverts(2,:), Uverts(3,:), ...
     'FaceColor', [0.3 0.6 1.0], ...   % solid blueish color
     'EdgeColor', [0.8 0.8 1], ...     % soft white edges
     'LineWidth', 1.2, ...
-    'FaceAlpha',0.5);
+    'FaceAlpha',0.1);
 
 % Vertices
 scatter3(Uverts(1,:), Uverts(2,:), Uverts(3,:), ...
-         45, 'w', 'filled', 'MarkerEdgeColor','k');
+         45, 'k', 'filled', 'MarkerEdgeColor','k');
 
 % --- Plot mapped 2D AMS points ---
 plot3(T3(1,:), T3(2,:), T3(3,:), 'o', ...
@@ -52,7 +52,7 @@ plot3(T3(1,:), T3(2,:), T3(3,:), 'o', ...
       'MarkerEdgeColor','none', 'MarkerSize',6);
 
 %AMS hull outline (cyan)
-plot3(X(K2), Y(K2), zeros(size(K2)), 'c-', 'LineWidth',2);
+plot3(X(K2), Y(K2), zeros(size(K2)),'color',[0.35 0.6 1], 'LineWidth',2);
 % --- Mapping arrows (always from 3D vertex to AMS point, with arrowheads) ---
 for k = 1:size(Uverts,2)
     u = Uverts(:,k);   % start (control-space vertex)
@@ -74,9 +74,9 @@ end
 
 
 % --- Legend ---
-legend({'Control-space faces','Vertices', ...
-       'AMS hull (2D)'}, ...
-      'TextColor','w','Location','northeastoutside');
+%legend({'Control-space faces','Vertices', ...
+%       'AMS hull (2D)'}, ...
+%      'TextColor','w','Location','northeastoutside');
 
 end
 
