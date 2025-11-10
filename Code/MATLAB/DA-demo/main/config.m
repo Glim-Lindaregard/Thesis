@@ -8,27 +8,42 @@ cfg.beta = zeros(8,1);
 
 cfg.u_max = 0.7*ones(8,1);      %Max thruster outputs [N]
 cfg.u_min = zeros(8,1);         %Min thruster outputs [N]
-a = 0.2;
-cfg.pos  = [ +a,+a;
-             +a,+a;
-             -a,+a;
-             -a,+a;
-             -a,-a;
-             -a,-a;
-             +a,-a;
-             +a,-a ];           %Thruster positions [x y] per thruster [m]
+%a = 0.2;
+% cfg.pos  = [ +a,+a;
+%              +a,+a;
+%              -a,+a;
+%              -a,+a;
+%              -a,-a;
+%              -a,-a;
+%              +a,-a;
+%              +a,-a ];           %Thruster positions [x y] per thruster [m]
+
+a = 0.195; b = 0.140;
+cfg.pos = [ +a,+b;
+            +b,+a;
+            -b,+a;   % fixed
+            -a,+b;
+            -a,-b;
+            -b,-a;
+            +b,-a;
+            +a,-b ];
+
+
 cfg.a = a;                      %Length from body center to edge [m]
 
 cfg.N = length(cfg.pos(:,1));   %Number of thrusters
 
-cfg.beta = [ 3*pi/2; 
-                  pi; 
-                   0; 
-              3*pi/2; 
-                pi/2; 
-                   0; 
-                  pi; 
-                pi/2 ];         %Thruster angles from +x [radians]
+% cfg.beta = [ 3*pi/2; 
+%                   pi; 
+%                    0; 
+%               3*pi/2; 
+%                 pi/2; 
+%                    0; 
+%                   pi; 
+%                 pi/2 ];         %Thruster angles from +x [radians]
+
+cfg.beta = [0, pi/2, pi/2, pi, pi, 3*pi/2, 3*pi/2, 0]' + pi;
+
 
 
 % Build A matrix

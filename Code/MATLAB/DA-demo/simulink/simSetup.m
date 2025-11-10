@@ -10,7 +10,7 @@ uCashe(m+1).U = U0;
 uCashe(m+1).A = cfg0.A;
 
 % Single-failures
-for i = 1:m 
+for i = 1:2^m
     cfgi  = cfg0;
     cfgi.A(:,i) = 0;
     cfgi.u_min(i) = 0;
@@ -23,14 +23,14 @@ for i = 1:m
 end
 
 
-broken = 5;
-failureTime = 2;
+broken = 4;
+failureTime = 1;
 
-simTime = 10;
+simTime = 20;
 
-ref = [0,5,pi,0,0,0]';
+ref = [3,5,pi + 0.3,0,0,0]';
 
-init = [0 0 0 0 0 0];
+init = [0 0 pi/2 0 0 0];
 
 % Constants
 mass    = 4.436; % [kg]
@@ -75,7 +75,7 @@ if 1
     AMSopts = struct( ...
         'FaceColor', [0.78 1 0.92], ... % pastel cyan
         'EdgeColor', 1*[1 1 1], ...
-        'FaceAlpha', 0.95, ...
+        'FaceAlpha', 1, ...
         'EdgeAlpha', 0.8, ...
         'LineWidth', 0.6, ...
         'BackgroundColor', 0.2*[1 1 1], ...
@@ -93,7 +93,7 @@ if 1
         'ShowBasis', false);
 
 
-    %visualizeAMS(AMS_current,AMSopts);
+    visualizeAMS(U0,cfg0.A,1,AMSopts,1,1,1);
 
     %visualizeSlider(cfg,U);
 end
