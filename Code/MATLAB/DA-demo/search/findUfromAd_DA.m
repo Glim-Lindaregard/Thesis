@@ -29,8 +29,7 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
         M = [ad,  adi - adj,  adi - adk]; 
         
         if rcond(M) < tol
-            %fprintf("M singular at %d where the normal is %d %d %d\n",...
-            %   k,AMS.facets(k).norms(1),AMS.facets(k).norms(2),AMS.facets(k).norms(3));
+            %fprintf("M singular \n");
             continue;
         else   
             x = M\adi; 
@@ -49,8 +48,20 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
             else
                 uOut = uStar;
             end
+
             found = 1;
             index = k;
+
+            % tol = 1e-14;  % or whatever fits your numeric scale
+            % if all(abs(uOut) < tol) && any(abs(ad) > tol)
+            %     uOut = [0 0 0 1 0 0 0 1]';
+            %     fprintf("Hello HAHAHAHHAHAHA\n");
+            %     found = 1;
+            %     index = k;
+            % else
+            %     found = 1;
+            %     index = k;
+            % end
         end
     end
 end

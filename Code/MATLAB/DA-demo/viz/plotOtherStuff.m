@@ -29,19 +29,19 @@ function plotOtherStuff(simout)
     % aPDx vs aAlloX
     nexttile;
     plot(t_PD, aPDdataX, '-', 'LineWidth', 1.4, 'DisplayName','aPDx'); hold on;
-    plot(t_allo, aAlloX, '-', 'LineWidth', 1.4, 'DisplayName','aAlloX'); hold on;
+    plot(t_allo, aAlloX, '--', 'LineWidth', 1.4, 'DisplayName','aAlloX'); hold on;
     grid on; ylabel('Force [N]'); legend('aPDx','aAlloX'); title('aPDx VS aAlloX');
 
     % aPDy vs aAlloY
     nexttile;
     plot(t_PD, aPDdataY, '-', 'LineWidth', 1.4, 'DisplayName','aPDy'); hold on;
-    plot(t_allo, aAlloY, '-', 'LineWidth', 1.4, 'DisplayName','aAlloY'); hold on;
+    plot(t_allo, aAlloY, '--', 'LineWidth', 1.4, 'DisplayName','aAlloY'); hold on;
     grid on; ylabel('Force [N]'); legend('aPDy','aAlloY'); title('aPDy VS aAlloY');
 
     % aPDth vs aAlloTH
     nexttile;
     plot(t_PD, aPDdataTh, '-', 'LineWidth', 1.4, 'DisplayName','aPDth'); hold on;
-    plot(t_allo, aAlloTh, '-', 'LineWidth', 1.4, 'DisplayName','aAlloTh'); hold on;
+    plot(t_allo, aAlloTh, '--', 'LineWidth', 1.4, 'DisplayName','aAlloTh'); hold on;
     grid on; ylabel('Moment [Nm]'); legend('aPDth','aAlloTh'); title('aPDth VS aAlloTh');
 
 end

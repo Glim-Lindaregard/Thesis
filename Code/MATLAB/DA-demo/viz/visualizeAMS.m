@@ -28,12 +28,12 @@ figure('Color',BackgroundColor); hold on
 count = size(U,3);
 
 scale = 2;
+center = [0 0 0];
 
 axis manual; axis equal; axis vis3d; ...
     xlim([-scale,scale]); ylim([-scale,scale]); zlim([-scale/2,scale/2]);
 view(45,30) 
 
-center = [0 0 0]; %AMS.center;
 
 for k = 1:count
     %Get a facets verteces.

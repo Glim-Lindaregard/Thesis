@@ -40,7 +40,11 @@ for i = 1:N-1
     A2 = Asub(dropRow,:)';
 
     n = zeros(3,1);
+    
+    warning('off', 'MATLAB:singularMatrix');
     n(setdiff(1:3,dropRow)) = -A1 \ A2;
+    warning('on', 'MATLAB:singularMatrix');
+
     n(dropRow) = 1;
     
     n(abs(n) < tol) = 0;
