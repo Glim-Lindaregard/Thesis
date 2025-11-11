@@ -69,25 +69,96 @@
 % end
 % plot(0,0,'ko','MarkerFaceColor','k');
 % grid on;
+% 
+% 
+% % pull first pose
+% st = simout.logsout.get('State').Values;
+% x0 = st.Data(1,1); y0 = st.Data(1,2); th0 = st.Data(1,3);
+% 
+% % config geometry (body frame)
+% pos  = cfg0.pos;           % 8×2
+% beta = cfg0.beta(:);       % 8×1
+% 
+% % body->world at the first frame
+% R = [cos(th0) -sin(th0); sin(th0) cos(th0)];
+% thr_w = (R*pos.').'+[x0 y0];   % 8×2
+% 
+% % classify quadrants relative to (x0,y0)
+% q = sign(thr_w - [x0 y0]);      % +1 or -1 per axis
+% Qpp = find(q(:,1)>0 & q(:,2)>0);   % (+,+)  top-right
+% Qmp = find(q(:,1)<0 & q(:,2)>0);   % (-,+)  top-left
+% Qmm = find(q(:,1)<0 & q(:,2)<0);   % (-,-)  bottom-left
+% Qpm = find(q(:,1)>0 & q(:,2)<0);   % (+,-)  bottom-right
+% 
+% disp(struct('top_right',[Qpp(1),Qpp(2)],'top_left',[Qmp(1), Qmp(2)],...
+%     'bottom_left',Qmm,'bottom_right',Qpm))
+
+clear all;
 
 
-% pull first pose
-st = simout.logsout.get('State').Values;
-x0 = st.Data(1,1); y0 = st.Data(1,2); th0 = st.Data(1,3);
 
-% config geometry (body frame)
-pos  = cfg0.pos;           % 8×2
-beta = cfg0.beta(:);       % 8×1
 
-% body->world at the first frame
-R = [cos(th0) -sin(th0); sin(th0) cos(th0)];
-thr_w = (R*pos.').'+[x0 y0];   % 8×2
+cfg0  = config();
 
-% classify quadrants relative to (x0,y0)
-q = sign(thr_w - [x0 y0]);      % +1 or -1 per axis
-Qpp = find(q(:,1)>0 & q(:,2)>0);   % (+,+)  top-right
-Qmp = find(q(:,1)<0 & q(:,2)>0);   % (-,+)  top-left
-Qmm = find(q(:,1)<0 & q(:,2)<0);   % (-,-)  bottom-left
-Qpm = find(q(:,1)>0 & q(:,2)<0);   % (+,-)  bottom-right
+m     = size(cfg0.A,2);                  % should be 8
 
-disp(struct('top_right',[Qpp(1),Qpp(2)],'top_left',[Qmp(1), Qmp(2)],'bottom_left',Qmm,'bottom_right',Qpm))
+
+uCache = struct([]);
+
+
+for k = 0:(2^m - 1)
+    mask = logical(bitget(k, 1:m));   % 1 = healthy, 0 = failed
+    
+    cfgi = cfg0;
+    cfgi.A(:, ~mask) = 0;             % zero failed thruster columns
+    cfgi.u_min(~mask) = 0;            % zero min/max ranges
+    cfgi.u_max(~mask) = 0;
+    cfgi.N = m;                       % keep same dimension
+    if k == 160
+        h=0;
+    end
+    Ui= Copy_of_buildAMS_row(cfgi);
+    uCache(k+1).U = Ui;
+    uCache(k+1).A = cfgi.A;
+    uCache(k+1).mask = mask;
+end
+
+
+
+healthy = bin2dec('00100001') + 1; % [8,7,6,5,4,3,2,1]
+
+ad = [-1 0 -0.098]';
+Uc = uCache(healthy).U;
+Ac = uCache(healthy).A;
+
+[Uout,index,x] = findUfromAd_DA(ad,Uc,Ac)
+
+ap = Ac*Uout;
+
+
+
+AMSopts = struct( ...
+        'FaceColor', [0.78 1 0.92], ... % pastel cyan
+        'EdgeColor', 1*[1 1 1], ...
+        'FaceAlpha', 0.9, ...
+        'EdgeAlpha', 0.8, ...
+        'LineWidth', 0.6, ...
+        'BackgroundColor', 0.2*[1 1 1], ...
+        'GridColor', 0.4*[0.9 0.9 0.9], ...
+        'GridAlpha', 1, ...
+        'GridLineStyle', '-', ...
+        'UseOctantColors', false, ...
+        'Lighting', true, ...
+        'ShowNormals', false,...
+        'fps', 10, ...
+        'Fancy', false, ...
+        'Index', index, ...
+        'ShowProduced', true,...
+        'ShowDesired', true,...
+        'ShowBasis', true);
+
+%visualizeAMS(Uc,Ac,1,AMSopts,1,ad,1);
+
+visualizeAMS(Uc,Ac,1,AMSopts,ap,ad,x);
+
+

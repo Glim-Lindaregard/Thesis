@@ -4,11 +4,6 @@ clear all; close all;
 cfg0  = config();
 m     = size(cfg0.A,2);                  % should be 8
 
-U0 = Copy_of_buildAMS_row(cfg0);
-
-% uCashe(m+1).U = U0;
-% uCashe(m+1).A = cfg0.A;
-
 uCache = struct([]);
 
 
@@ -28,21 +23,19 @@ for k = 0:(2^m - 1)
 end
 
 
-healthy = bin2dec('10011111') + 1;
-failureTime = 0;
 
-simTime = 10;
+%healthy = bin2dec('00111111') + 1;  % [8,7,6,5,4,3,2,1]
+failureTime = [inf 2 inf inf inf 1 inf inf];    %[1,2,3,4,5,6,7,8]
 
-ref = [3,5,0,0,0,0]';
+simTime = 15;
 
-init = [3 0 0 0 0 0];
+ref = [1,1.3,0.1,0,0,0]';
+
+init = [1 0.1 0.1 0 0 0];
 
 % Constants
 mass    = 4.436; % [kg]
 I_zz = 1.092; % [kgm^2]
-
-
-
 
 
 % PID parameters (TEMP)
@@ -54,55 +47,49 @@ ki = diag([0.05 0.05 0.064]);
 % --- run ---
 simout = sim('sliderSim');
 
-m = size(cfg0.A,2);
-%assert(ismember(broken,1:m+1),'broken must be 1..m+1');
-
-% A_used   = uCache(broken).A;
-% zeroCols = find(all(abs(A_used)<1e-12,1));   % which thruster(s) are zeroed
-% disp(struct('broken',broken,'zeroed_columns',zeroCols))
-
-
 
 %Visualizion
 if 1
-    AniOpts.fps = 500;
+    AniOpts.fps = 90;
     AniOpts.saveVideo = false;
     AniOpts.videoName = 'sliderAnimation.mp4';
-    AniOpts.simSpeed = 200;
+    AniOpts.simSpeed = 20;
+    AniOpts.broken_len = 0.6;
 
-    animateTrajectory(simout,ref,cfg0,AniOpts,9,failureTime);
+    animateTrajectory(simout,ref,cfg0,AniOpts,failureTime);
     
     plotStates(simout,ref);
     
     plotOtherStuff(simout);
 
     %---Visualize AMS facets---
-    AMSopts = struct( ...
-        'FaceColor', [0.78 1 0.92], ... % pastel cyan
-        'EdgeColor', 1*[1 1 1], ...
-        'FaceAlpha', 0.1, ...
-        'EdgeAlpha', 0.8, ...
-        'LineWidth', 0.6, ...
-        'BackgroundColor', 0.2*[1 1 1], ...
-        'GridColor', 0.4*[0.9 0.9 0.9], ...
-        'GridAlpha', 1, ...
-        'GridLineStyle', '-', ...
-        'UseOctantColors', false, ...
-        'Lighting', true, ...
-        'ShowNormals', false,...
-        'fps', 10, ...
-        'Fancy', false, ...
-        'Index', 0, ...
-        'ShowProduced', true,...
-        'ShowDesired', true,...
-        'ShowBasis', false);
+AMSOpts = struct(...
+    'FaceColor',        [0.78 0.92 0.92], ...
+    'EdgeColor',        [0.15 0.15 0.18], ...
+    'FaceAlpha',        0.95, ...
+    'EdgeAlpha',        0.85, ...
+    'LineWidth',        0.7, ...
+    'BackgroundColor',  [1 1 1]*0.2, ...
+    'GridColor',        [0.65 0.65 0.70], ...
+    'GridAlpha',        0.35, ...
+    'GridLineStyle',    '--', ...
+    'FontSize',         11, ...
+    'View',             [45 30], ...            % fixed camera (no spin)
+    'Lighting',         false, ...              % off for consistent panels
+    'ShowNormals',      false, ...
+    'Fancy',            false, ...              % no orbit/camera spin
+    'ShowProduced',     true, ...
+    'ShowDesired',      true, ...
+    'MaxPanels',        9, ...                  % up to 9 scenarios (8 thrusters)
+    'TileOverride',     [], ...                 % e.g., [rows cols]; [] = auto
+    'TitlePrefix',      'Scenario ');
+
+
     a = simout.logsout.get('a').Values.Data;
     ad = simout.logsout.get('ad').Values.Data;
 
 
-
-
-    visualizeAMS(uCache(healthy).U,uCache(healthy).A,1,AMSopts,a(:,:,10),ad(:,:,10),1);
+    visualizeAMSGrid(uCache,failureTime,AMSOpts);
 
     %visualizeSlider(cfg,U);
 end

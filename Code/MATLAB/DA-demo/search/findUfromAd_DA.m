@@ -1,5 +1,5 @@
 function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
-    found = 0; k = 0;
+    found = 0; k = 0; singular = 0;
     tol = 1e-15;
     N = size(A,2);
 
@@ -13,36 +13,46 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
         Vk = A*Uk;
 
         if k == size(U,3)
-            %fprintf("No such moment possible\n")
+            fprintf("No such moment possible\n")
             uOut = zeros(N,1);
             found = 1;
             index = 0;
             x = 0 * ones(3,1);
             continue;
         end
+        
 
         adi = Vk(:,1);
+        if all(abs(adi)< tol)
+            adi = Vk(:,3);
+        end
         adj = Vk(:,2);
         adk = Vk(:,4);
 
   
         M = [ad,  adi - adj,  adi - adk]; 
-        
+
         if rcond(M) < tol
-            %fprintf("M singular \n");
-            continue;
+            x =pinv(M)*adi;
+            wasPinv = true;
         else   
             x = M\adi; 
+            wasPinv = false;
         end
         
         a = x(1); b = x(2); c = x(3);
 
-        if a >= 0 && b >= 0 && c >= 0 && b <= 1 && c <= 1
+        if a > 0 && b >= 0 && c >= 0 && b <= 1 && c <= 1
 
             ui = U(:,1,k);
             uj = U(:,2,k);
             uk = U(:,4,k);
             uStar = ui + b*(uj-ui) + c*(uk-ui);
+
+
+            if wasPinv
+                fprintf("pinv was used to find U\n");
+            end
             if a >= 1
                 uOut = uStar / a;
             else
@@ -51,17 +61,6 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
 
             found = 1;
             index = k;
-
-            % tol = 1e-14;  % or whatever fits your numeric scale
-            % if all(abs(uOut) < tol) && any(abs(ad) > tol)
-            %     uOut = [0 0 0 1 0 0 0 1]';
-            %     fprintf("Hello HAHAHAHHAHAHA\n");
-            %     found = 1;
-            %     index = k;
-            % else
-            %     found = 1;
-            %     index = k;
-            % end
         end
     end
 end

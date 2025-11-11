@@ -1,4 +1,4 @@
-function [U,A,norms,center] = Copy_of_buildAMS_row(cfg)
+function [U,A,norms] = Copy_of_buildAMS_row(cfg)
 
 A = cfg.A; umin = cfg.u_min; umax = cfg.u_max;
 N = cfg.N;  t = 0; tol = 1e-14;
@@ -11,10 +11,16 @@ maxFacets = N* (N-1); % Conservative estimate
 U = zeros(N,4,maxFacets);
 V = zeros(3,4,maxFacets);
 norms = zeros(1,3,maxFacets);
-%center = zeros(3, 1);
 
 
-zeroIndex = find(all(abs(A) < 0.01),1);
+zeroIndex = find(all(abs(A) < tol));  %Multi broke
+
+
+if numel(zeroIndex) >= size(A,2) - 1
+    U = zeros(8,4,56);
+    norms = zeros(1,3,56);
+    return;
+end
 
 if isempty(zeroIndex)
     zeroIndex = -1;
@@ -22,15 +28,14 @@ end
 
 % --- Pics all unique combinations of A columns ---
 for i = 1:N-1
-    if i == zeroIndex
+    if any(zeroIndex == i)
         continue
     end
     for j = i+1:N
-        if j == zeroIndex
+        if any(zeroIndex == j)
             continue
         end
     % --- Straight froNTang paper ---
-    
 
     Asub = A(:,[i j]);
 
@@ -97,8 +102,6 @@ for i = 1:N-1
     end
 end
 
-V = V(:,:,1:t);  %Removes ununsed preallocated spots.
-center = findCenter(V);
 end
 
 %HFind best conditioned 2x2 matrix

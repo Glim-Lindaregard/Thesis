@@ -1,34 +1,22 @@
-function animateTrajectory(simout, ref, cfg, opts, broken, failureTime)
-% ANIMATETRAJECTORY  Animate slider pose + thrusters.
-%   animateTrajectory(simout, ref, cfg, opts, broken, failureTime)
-%     simout       : Simulink output (logsout must contain 'State' and 'u')
-%     ref          : [x y theta ...] reference (used only to draw a ref arrow)
-%     cfg          : config() struct (uses cfg.a, cfg.pos, cfg.beta, cfg.A)
-%     opts         : struct with fields:
-%                      tol_u (default 1e-6)
-%                      fps (60)
-%                      saveVideo (false)
-%                      videoName ('slider_traj.mp4')
-%                      simSpeed (1)
-%                      broken_len (1.0)   % red arrow length in body radii
-%                      arrow_scale (auto) % scales green thrust arrows
-%     broken       : 1..m for failed thruster, m+1 or 0 = no failure
-%     failureTime  : time (seconds) when failure begins (red arrow appears)
+function animateTrajectory(simout, ref, cfg, opts, failureTime)
+% ANIMATETRAJECTORY  Animate slider pose + thrusters with multi-failure markers.
+%   healthy: scalar index where (healthy-1) is the 8-bit mask (1=healthy, 0=failed)
+%            with bit order LSB=thruster 1 ... MSB=thruster 8.
+%            Example: healthy = bin2dec('10111111') + 1  (thruster 7 failed).
+%   failureTime: seconds after which failed thrusters get a red marker.
 
     % ---- defaults
-    if nargin < 6 || isempty(failureTime), failureTime = 0; end
-    if nargin < 5 || isempty(broken),      broken      = 0; end
+    if nargin < 5 || isempty(failureTime), failureTime = 0; end
     if nargin < 4 || isempty(opts),        opts        = struct(); end
     if ~isfield(opts,'tol_u'),        opts.tol_u      = 1e-6;      end
     if ~isfield(opts,'fps'),          opts.fps        = 60;        end
     if ~isfield(opts,'saveVideo'),    opts.saveVideo  = false;     end
     if ~isfield(opts,'videoName'),    opts.videoName  = 'slider_traj.mp4'; end
     if ~isfield(opts,'simSpeed'),     opts.simSpeed   = 1;         end
-    if ~isfield(opts,'broken_len'),   opts.broken_len = 1.0;       end
+    if ~isfield(opts,'broken_len'),   opts.broken_len = 0.6;       end
 
     % ---- meta
     m = size(cfg.A,2);
-    failedIdx = (broken<=m) * broken;    % m+1 or 0 => no failure
 
     % ---- logs
     logs     = simout.logsout;
@@ -37,10 +25,13 @@ function animateTrajectory(simout, ref, cfg, opts, broken, failureTime)
     t_state  = state_ts.Time;
     Xraw     = state_ts.Data;
     x = Xraw(:,1); y = Xraw(:,2); th = Xraw(:,3);
-    t = seconds(t_state - t_state(1)); t = t(:);
+    %t = seconds(t_state - t_state(1)); t = t(:);
+    t  = t_state - t_state(1);      % double seconds
+
 
     u_ts = logs.get('u').Values;
-    tu   = seconds(u_ts.Time - u_ts.Time(1)); tu = tu(:);
+    %tu   = seconds(u_ts.Time - u_ts.Time(1)); tu = tu(:);
+    tu = u_ts.Time - u_ts.Time(1);  % double seconds
     U    = normalizeU(u_ts.Data);                 % 8×N
     if ~isequal(size(U,2), numel(t)) || any(t ~= tu)
         U = interp1(tu, U.', t, 'previous','extrap').';  % 8×N
@@ -85,19 +76,34 @@ function animateTrajectory(simout, ref, cfg, opts, broken, failureTime)
     hX = quiver(NaN,NaN,NaN,NaN,0,'LineWidth',1.5,'MaxHeadSize',2.5,'Color','b'); % x_b^+
     hY = quiver(NaN,NaN,NaN,NaN,0,'LineWidth',1.5,'MaxHeadSize',2.5,'Color','y'); % y_b^+
 
-    % red marker for failed thruster (hidden until failureTime)
-    hBroken = quiver(NaN,NaN,NaN,NaN,0, ...
-        'LineWidth',1.8,'MaxHeadSize',2.5,'Color',[0.9 0.2 0.2], ...
-        'HandleVisibility','off','Visible','off');
+    % --- multi-failure red markers (one per thruster, initially hidden)
+    hBroken = gobjects(m,1);
+    for i = 1:m
+        hBroken(i) = quiver(NaN,NaN,NaN,NaN,0, ...
+            'LineWidth',1.8,'MaxHeadSize',2.5,'Color',[0.9 0.2 0.2], ...
+            'HandleVisibility','off','Visible','off');
+
+        set(hBroken(i), 'AutoScale', 'off', 'Clipping','off');  % force size / on-top draw
+        uistack(hBroken(i), 'top');                             % draw above green arrows
+
+    end
 
     legend([trace, hQuiv(1)], {'trajectory','active thruster'}, ...
            'TextColor',[0.95 0.95 0.95], 'Location','best');
+
+
+    % ---- per-thruster failure times (1×m, seconds; Inf = never fails)
+    % ---- per-thruster failure times (1×m; Inf = never fails)
+    ft = prepareFailureTimes_onlyTimes(failureTime, m);
+
+
 
     % ---- animation loop
     N = numel(t);
     dt_target = 1/max(1,opts.fps);
 
     for k = 1:N
+
         set(trace,'XData',x(1:k),'YData',y(1:k));
 
         xc=x(k); yc=y(k); thk=th(k);
@@ -116,37 +122,42 @@ function animateTrajectory(simout, ref, cfg, opts, broken, failureTime)
         updateCircle(hBody, [xc yc], body_r);
         set(hPts,'XData',thr_w(:,1),'YData',thr_w(:,2));
 
-        % green thrust arrows
+        % green thrust arrows (hide once that thruster has failed)
         uf      = U(:,k);
         active  = abs(uf) > opts.tol_u;
-        dir_l   = [cos(beta) sin(beta)];    % body-frame dirs
-        dir_w   = (R*dir_l.').';            % world-frame dirs
-        L       = opts.arrow_scale * uf;    % signed lengths
+        dir_l   = [cos(beta) sin(beta)];       % body-frame dirs
+        dir_w   = (R*dir_l.').';               % world-frame dirs
+        L       = opts.arrow_scale * uf;       % signed lengths
         Ux      = dir_w(:,1).*L;  Uy = dir_w(:,2).*L;
-
+        
+        tk = t(k);                              % current time (double seconds)
+        
         for i = 1:m
+            isFailedNow = (tk >= ft(i));        % per-thruster gating
             set(hQuiv(i), 'XData',thr_w(i,1), 'YData',thr_w(i,2), ...
                           'UData',Ux(i),      'VData',Uy(i), ...
-                          'Visible', tern(active(i),'on','off'));
+                          'Visible', tern(active(i) && ~isFailedNow, 'on','off'));
+        end
+        
+        % red broken markers (per thruster; appear at/after its own failure time)
+        Lb = opts.broken_len * body_r;
+        for i = 1:m
+            if tk >= ft(i)
+                bdir = dir_w(i,:);              % world-frame nozzle direction
+                set(hBroken(i), 'XData',thr_w(i,1), 'YData',thr_w(i,2), ...
+                                'UData',Lb*bdir(1), 'VData',Lb*bdir(2), ...
+                                'Visible','on');
+            else
+                set(hBroken(i),'Visible','off');
+            end
         end
 
-        % red broken marker (only after failureTime)
-        if failedIdx > 0 && t(k) >= failureTime
-            Lb  = opts.broken_len * body_r;
-            bx  = thr_w(failedIdx,1);  by = thr_w(failedIdx,2);
-            % use current world direction of that nozzle
-            bdir = dir_w(failedIdx,:);
-            set(hBroken,'XData',bx,'YData',by, ...
-                        'UData',Lb*bdir(1), 'VData',Lb*bdir(2), ...
-                        'Visible','on');
-        else
-            set(hBroken,'Visible','off');
-        end
 
         drawnow limitrate;
 
         if k < N
-            dt = seconds(t(min(k+1,N)) - t(k));
+            %dt = seconds(t(min(k+1,N)) - t(k));
+            dt = t(min(k+1,N)) - t(k);
             pause(opts.simSpeed*max(0, min(dt_target, dt)));
         end
     end
@@ -188,4 +199,22 @@ end
 
 function s = tern(tf, a, b)
     if tf, s=a; else, s=b; end
+end
+
+function ft = prepareFailureTimes_onlyTimes(failureTime, m)
+% failureTime: scalar or 1×m (seconds). Inf => never fails. Negative => fail at t=0.
+    if nargin < 1 || isempty(failureTime)
+        ft = inf(1,m);
+        return;
+    end
+    if isscalar(failureTime)
+        ft = repmat(double(failureTime), 1, m);
+    else
+        if numel(failureTime) ~= m
+            error('failureTime must be scalar or length-%d vector.', m);
+        end
+        ft = double(failureTime(:)).';
+    end
+    ft(~isfinite(ft)) = inf;   % NaN -> never
+    ft(ft < 0) = 0;            % negative -> fail at t=0
 end
