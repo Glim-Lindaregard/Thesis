@@ -83,13 +83,17 @@
 \usepackage[utf8]{inputenc}
 \usepackage{float}
 \usepackage[acronym]{glossaries}
-\usepackage{acronym}
+\makeglossaries
+%\usepackage{acronym}
 \usepackage{comment}
 \usepackage{hyperref}
-\usepackage{lipsum}
+\usepackage{lipsum}%
 \usepackage{tikz}
 \usepackage{tikz-3dplot}
 \usepackage{xcolor}
+\usepackage{silence}
+\WarningFilter{latex}{Marginpar on page}
+
 \usetikzlibrary{arrows.meta, calc, positioning}
 %\RequirePackage[latin1]{inputenc}
 \RequirePackage{titletoc}
@@ -309,8 +313,8 @@
  \renewcommand{\ischapter}{1}
  \pagestyle{fancy}
  \fancyhf{}
- \fancyhead[RE]{}
- \fancyhead[LO]{}
+ \fancyhead[RE]{\sc{\nouppercase{\leftmark}}}
+ \fancyhead[LO]{\sc{\nouppercase{\rightmark}}}
  \fancyhead[LE]{\thepage} 
  \fancyhead[RO]{\thepage}
 }

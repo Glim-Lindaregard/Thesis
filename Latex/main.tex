@@ -1,7 +1,7 @@
 %-------------------------------------------------------------------
 % Document class and package definitions
 %-------------------------------------------------------------------
-\documentclass[12pt,a4paper,openany,final,oneside]{cseethesis}
+\documentclass[12pt,a4paper,openright,final,twoside]{cseethesis}
 
 %Included for Gather Purpose only:
 %input "thesisreferences.bib"
@@ -54,7 +54,7 @@
 }
 
 %Fic todo note overflow
-\setlength{\marginparwidth}{2cm} % tweak 2.2–3.0cm as needed
+\setlength{\marginparwidth}{2.5cm} % tweak 2.2–3.0cm as needed
 
 
 
@@ -91,11 +91,14 @@
   width=\textwidth,          % span full text width
   boxrule=1pt,               % border thickness
   arc=5pt,                   % rounded corners
-  center
+  center,
+  width = 0.9\textwidth
 }
 
-\newcommand{\note}[1]{%
-  \begin{draftnote}#1\end{draftnote}%
+\newcommand{\notee}[1]{
+  \begin{draftnote}
+    #1
+  \end{draftnote}
 }
 
 

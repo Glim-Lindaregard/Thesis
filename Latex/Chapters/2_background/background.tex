@@ -3,8 +3,27 @@
 \let\newpage\relax
 \let\pagebreak\relax
 
+\begin{tcolorbox}[  colback=cyan!30!white,     % light cyan background
+  %colbacklower=cyan!30!white,% darker cyan lower half
+  colframe=black,            % black border
+  coltitle=white,            % title text color
+  fontupper = \small \bfseries,
+  fonttitle=\bfseries,       % bold title
+  title=Draft Note,       % box title
+  width=\textwidth,          % span full text width
+  boxrule=1pt,               % border thickness
+  arc=5pt,                   % rounded corners
+  center,
+  width = 0.9\textwidth]
+  
+  Something like: Here we will introduce the different components of a \gls{FTCS}, how they work together, historical and current methods, and finish be explaining the literature gap for this thesis.
 
-\note{Something like: Here we will introduce the different components of a \ac{FTCS}, how they work together, historical and current methods, and finish be explaining the literature gap for this thesis.}
+\end{tcolorbox}
+
+\begin{tcolorbox}
+    hi
+\end{tcolorbox}
+    
 
 \section{Problem Context and Fault Models}
 \include{Chapters/2_background/sections/problemContext}

@@ -46,4 +46,13 @@ codegen/
 *.synctex.gz
 *.toc
 *.pdf
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.acn
+*.glo
+*.glsdefs
+*.ist
 
