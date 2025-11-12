@@ -1467,6 +1467,66 @@ INPUT /usr/share/texlive/texmf-dist/tex/latex/tcolorbox/tcbposter.code.tex
 INPUT ./main.aux
 INPUT main.aux
 INPUT main.aux
+INPUT ./Chapters/1_introduction/sections/the robot.aux
+INPUT Chapters/1_introduction/sections/the robot.aux
+INPUT Chapters/1_introduction/sections/the robot.aux
+INPUT ./Chapters/1_introduction/sections/spacecraft_control.aux
+INPUT Chapters/1_introduction/sections/spacecraft_control.aux
+INPUT Chapters/1_introduction/sections/spacecraft_control.aux
+INPUT ./Chapters/1_introduction/sections/fault-tolerant-control.aux
+INPUT Chapters/1_introduction/sections/fault-tolerant-control.aux
+INPUT Chapters/1_introduction/sections/fault-tolerant-control.aux
+INPUT ./Chapters/1_introduction/sections/objective.aux
+INPUT Chapters/1_introduction/sections/objective.aux
+INPUT Chapters/1_introduction/sections/objective.aux
+INPUT ./Chapters/1_introduction/sections/scope.aux
+INPUT Chapters/1_introduction/sections/scope.aux
+INPUT Chapters/1_introduction/sections/scope.aux
+INPUT ./Chapters/1_introduction/sections/disposition.aux
+INPUT Chapters/1_introduction/sections/disposition.aux
+INPUT Chapters/1_introduction/sections/disposition.aux
+INPUT ./Chapters/2_background/sections/problemContext.aux
+INPUT Chapters/2_background/sections/problemContext.aux
+INPUT Chapters/2_background/sections/problemContext.aux
+INPUT ./Chapters/2_background/sections/basicsFTC.aux
+INPUT Chapters/2_background/sections/basicsFTC.aux
+INPUT Chapters/2_background/sections/basicsFTC.aux
+INPUT ./Chapters/2_background/sections/controlMethods.aux
+INPUT Chapters/2_background/sections/controlMethods.aux
+INPUT Chapters/2_background/sections/controlMethods.aux
+INPUT ./Chapters/2_background/sections/reconfigMeca.aux
+INPUT Chapters/2_background/sections/reconfigMeca.aux
+INPUT Chapters/2_background/sections/reconfigMeca.aux
+INPUT ./Chapters/2_background/sections/allocationMethods.aux
+INPUT Chapters/2_background/sections/allocationMethods.aux
+INPUT Chapters/2_background/sections/allocationMethods.aux
+INPUT ./Chapters/2_background/sections/decisionLayer.aux
+INPUT Chapters/2_background/sections/decisionLayer.aux
+INPUT Chapters/2_background/sections/decisionLayer.aux
+INPUT ./Chapters/2_background/sections/performaceWrappers.aux
+INPUT Chapters/2_background/sections/performaceWrappers.aux
+INPUT Chapters/2_background/sections/performaceWrappers.aux
+INPUT ./Chapters/2_background/sections/stateOfArt.aux
+INPUT Chapters/2_background/sections/stateOfArt.aux
+INPUT Chapters/2_background/sections/stateOfArt.aux
+INPUT ./Chapters/2_background/sections/literatureGap.aux
+INPUT Chapters/2_background/sections/literatureGap.aux
+INPUT Chapters/2_background/sections/literatureGap.aux
+INPUT ./Chapters/2_background/sections/ROS.aux
+INPUT Chapters/2_background/sections/ROS.aux
+INPUT Chapters/2_background/sections/ROS.aux
+INPUT ./Chapters/2_background/sections/gazebo.aux
+INPUT Chapters/2_background/sections/gazebo.aux
+INPUT Chapters/2_background/sections/gazebo.aux
+INPUT ./Chapters/4_method/Sections/workspace.aux
+INPUT Chapters/4_method/Sections/workspace.aux
+INPUT Chapters/4_method/Sections/workspace.aux
+INPUT ./Chapters/4_method/Sections/AMS construction.aux
+INPUT Chapters/4_method/Sections/AMS construction.aux
+INPUT Chapters/4_method/Sections/AMS construction.aux
+INPUT ./Chapters/4_method/Sections/AMS Search.aux
+INPUT Chapters/4_method/Sections/AMS Search.aux
+INPUT Chapters/4_method/Sections/AMS Search.aux
 OUTPUT main.aux
 INPUT /usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 INPUT /usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
@@ -1524,6 +1584,16 @@ INPUT /usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.st
 INPUT /usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty
 INPUT /usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+INPUT ./main.out
+INPUT main.out
+INPUT ./main.out
+INPUT main.out
+INPUT ./main.out
+INPUT main.out
+INPUT ./main.out
+INPUT main.out
+INPUT ./main.out
+INPUT ./main.out
 OUTPUT main.out
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr17.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
@@ -1542,7 +1612,38 @@ INPUT ./preface.tex
 INPUT preface.tex
 INPUT ./preface.tex
 INPUT preface.tex
+INPUT ./main.lof
+INPUT main.lof
+INPUT main.lof
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr8.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr6.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmmi12.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmmi8.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmmi6.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsy8.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsy6.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmex10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
+INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam7.tfm
+INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm7.tfm
 OUTPUT main.lof
+INPUT ./main.lot
+INPUT main.lot
+INPUT main.lot
 OUTPUT main.lot
 INPUT ./acro_list.tex
 INPUT ./acro_list.tex
@@ -1552,25 +1653,374 @@ INPUT ./acro_list.tex
 INPUT ./acro_list.tex
 INPUT acro_list.tex
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
+INPUT ./main.toc
+INPUT main.toc
+INPUT main.toc
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmcsc10.tfm
 OUTPUT main.toc
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr17.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmmi12.tfm
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmmi12.tfm
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmex10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
+INPUT ./Chapters/1_introduction/introduction.tex
+INPUT ./Chapters/1_introduction/introduction.tex
+INPUT ./Chapters/1_introduction/introduction.tex
+INPUT Chapters/1_introduction/introduction.tex
+INPUT ./Chapters/1_introduction/introduction.tex
+INPUT ./Chapters/1_introduction/introduction.tex
+INPUT Chapters/1_introduction/introduction.tex
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
+INPUT ./Chapters/1_introduction/sections/the robot.tex
+INPUT ./Chapters/1_introduction/sections/the robot.tex
+INPUT ./Chapters/1_introduction/sections/the robot.tex
+OUTPUT Chapters/1_introduction/sections/the robot.aux
+INPUT ./Chapters/1_introduction/sections/the robot.tex
+INPUT ./Chapters/1_introduction/sections/the robot.tex
+INPUT ./Chapters/1_introduction/sections/the robot.tex
+INPUT Chapters/1_introduction/sections/the robot.tex
+INPUT ./Chapters/1_introduction/sections/the robot.tex
+INPUT Chapters/1_introduction/sections/the robot.tex
+INPUT ./Chapters/1_introduction/sections/spacecraft_control.tex
+INPUT ./Chapters/1_introduction/sections/spacecraft_control.tex
+INPUT ./Chapters/1_introduction/sections/spacecraft_control.tex
+OUTPUT Chapters/1_introduction/sections/spacecraft_control.aux
+INPUT ./Chapters/1_introduction/sections/spacecraft_control.tex
+INPUT ./Chapters/1_introduction/sections/spacecraft_control.tex
+INPUT ./Chapters/1_introduction/sections/spacecraft_control.tex
+INPUT Chapters/1_introduction/sections/spacecraft_control.tex
+INPUT ./Chapters/1_introduction/sections/spacecraft_control.tex
+INPUT Chapters/1_introduction/sections/spacecraft_control.tex
+INPUT ./Chapters/1_introduction/sections/fault-tolerant-control.tex
+INPUT ./Chapters/1_introduction/sections/fault-tolerant-control.tex
+INPUT ./Chapters/1_introduction/sections/fault-tolerant-control.tex
+OUTPUT Chapters/1_introduction/sections/fault-tolerant-control.aux
+INPUT ./Chapters/1_introduction/sections/fault-tolerant-control.tex
+INPUT ./Chapters/1_introduction/sections/fault-tolerant-control.tex
+INPUT ./Chapters/1_introduction/sections/fault-tolerant-control.tex
+INPUT Chapters/1_introduction/sections/fault-tolerant-control.tex
+INPUT ./Chapters/1_introduction/sections/fault-tolerant-control.tex
+INPUT Chapters/1_introduction/sections/fault-tolerant-control.tex
+INPUT ./Chapters/1_introduction/sections/objective.tex
+INPUT ./Chapters/1_introduction/sections/objective.tex
+INPUT ./Chapters/1_introduction/sections/objective.tex
+OUTPUT Chapters/1_introduction/sections/objective.aux
+INPUT ./Chapters/1_introduction/sections/objective.tex
+INPUT ./Chapters/1_introduction/sections/objective.tex
+INPUT ./Chapters/1_introduction/sections/objective.tex
+INPUT Chapters/1_introduction/sections/objective.tex
+INPUT ./Chapters/1_introduction/sections/objective.tex
+INPUT Chapters/1_introduction/sections/objective.tex
+INPUT ./Chapters/1_introduction/sections/scope.tex
+INPUT ./Chapters/1_introduction/sections/scope.tex
+INPUT ./Chapters/1_introduction/sections/scope.tex
+OUTPUT Chapters/1_introduction/sections/scope.aux
+INPUT ./Chapters/1_introduction/sections/scope.tex
+INPUT ./Chapters/1_introduction/sections/scope.tex
+INPUT ./Chapters/1_introduction/sections/scope.tex
+INPUT Chapters/1_introduction/sections/scope.tex
+INPUT ./Chapters/1_introduction/sections/scope.tex
+INPUT Chapters/1_introduction/sections/scope.tex
+INPUT ./Chapters/1_introduction/sections/disposition.tex
+INPUT ./Chapters/1_introduction/sections/disposition.tex
+INPUT ./Chapters/1_introduction/sections/disposition.tex
+OUTPUT Chapters/1_introduction/sections/disposition.aux
+INPUT ./Chapters/1_introduction/sections/disposition.tex
+INPUT ./Chapters/1_introduction/sections/disposition.tex
+INPUT ./Chapters/1_introduction/sections/disposition.tex
+INPUT Chapters/1_introduction/sections/disposition.tex
+INPUT ./Chapters/1_introduction/sections/disposition.tex
+INPUT Chapters/1_introduction/sections/disposition.tex
+INPUT ./Chapters/2_background/background.tex
+INPUT ./Chapters/2_background/background.tex
+INPUT ./Chapters/2_background/background.tex
+INPUT Chapters/2_background/background.tex
+INPUT ./Chapters/2_background/background.tex
+INPUT ./Chapters/2_background/background.tex
+INPUT Chapters/2_background/background.tex
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx10.tfm
+INPUT ./Chapters/2_background/sections/problemContext.tex
+INPUT ./Chapters/2_background/sections/problemContext.tex
+INPUT ./Chapters/2_background/sections/problemContext.tex
+OUTPUT Chapters/2_background/sections/problemContext.aux
+INPUT ./Chapters/2_background/sections/problemContext.tex
+INPUT ./Chapters/2_background/sections/problemContext.tex
+INPUT ./Chapters/2_background/sections/problemContext.tex
+INPUT Chapters/2_background/sections/problemContext.tex
+INPUT ./Chapters/2_background/sections/problemContext.tex
+INPUT Chapters/2_background/sections/problemContext.tex
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcrm1200.tfm
+INPUT ./Chapters/2_background/sections/basicsFTC.tex
+INPUT ./Chapters/2_background/sections/basicsFTC.tex
+INPUT ./Chapters/2_background/sections/basicsFTC.tex
+OUTPUT Chapters/2_background/sections/basicsFTC.aux
+INPUT ./Chapters/2_background/sections/basicsFTC.tex
+INPUT ./Chapters/2_background/sections/basicsFTC.tex
+INPUT ./Chapters/2_background/sections/basicsFTC.tex
+INPUT Chapters/2_background/sections/basicsFTC.tex
+INPUT ./Chapters/2_background/sections/basicsFTC.tex
+INPUT Chapters/2_background/sections/basicsFTC.tex
+INPUT ./images/basic_AFTCS.png
+INPUT ./images/basic_AFTCS.png
+INPUT images/basic_AFTCS.png
+INPUT ./images/basic_AFTCS.png
+INPUT ./images/basic_AFTCS.png
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmti10.tfm
+INPUT ./Chapters/2_background/sections/controlMethods.tex
+INPUT ./Chapters/2_background/sections/controlMethods.tex
+INPUT ./Chapters/2_background/sections/controlMethods.tex
+OUTPUT Chapters/2_background/sections/controlMethods.aux
+INPUT ./Chapters/2_background/sections/controlMethods.tex
+INPUT ./Chapters/2_background/sections/controlMethods.tex
+INPUT ./Chapters/2_background/sections/controlMethods.tex
+INPUT Chapters/2_background/sections/controlMethods.tex
+INPUT ./Chapters/2_background/sections/controlMethods.tex
+INPUT Chapters/2_background/sections/controlMethods.tex
+INPUT ./bu1.aux
+INPUT bu1.aux
+INPUT bu1.aux
+OUTPUT bu1.aux
+INPUT ./Chapters/2_background/sections/reconfigMeca.tex
+INPUT ./Chapters/2_background/sections/reconfigMeca.tex
+INPUT ./Chapters/2_background/sections/reconfigMeca.tex
+OUTPUT Chapters/2_background/sections/reconfigMeca.aux
+INPUT ./Chapters/2_background/sections/reconfigMeca.tex
+INPUT ./Chapters/2_background/sections/reconfigMeca.tex
+INPUT ./Chapters/2_background/sections/reconfigMeca.tex
+INPUT Chapters/2_background/sections/reconfigMeca.tex
+INPUT ./Chapters/2_background/sections/reconfigMeca.tex
+INPUT Chapters/2_background/sections/reconfigMeca.tex
+INPUT ./Chapters/2_background/sections/allocationMethods.tex
+INPUT ./Chapters/2_background/sections/allocationMethods.tex
+INPUT ./Chapters/2_background/sections/allocationMethods.tex
+OUTPUT Chapters/2_background/sections/allocationMethods.aux
+INPUT ./Chapters/2_background/sections/allocationMethods.tex
+INPUT ./Chapters/2_background/sections/allocationMethods.tex
+INPUT ./Chapters/2_background/sections/allocationMethods.tex
+INPUT Chapters/2_background/sections/allocationMethods.tex
+INPUT ./Chapters/2_background/sections/allocationMethods.tex
+INPUT Chapters/2_background/sections/allocationMethods.tex
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmmi10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmex10.tfm
-INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
-INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
-INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
-INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
-INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
-INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
-INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
-INPUT /usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
+INPUT ./Chapters/2_background/sections/decisionLayer.tex
+INPUT ./Chapters/2_background/sections/decisionLayer.tex
+INPUT ./Chapters/2_background/sections/decisionLayer.tex
+OUTPUT Chapters/2_background/sections/decisionLayer.aux
+INPUT ./Chapters/2_background/sections/decisionLayer.tex
+INPUT ./Chapters/2_background/sections/decisionLayer.tex
+INPUT ./Chapters/2_background/sections/decisionLayer.tex
+INPUT Chapters/2_background/sections/decisionLayer.tex
+INPUT ./Chapters/2_background/sections/decisionLayer.tex
+INPUT Chapters/2_background/sections/decisionLayer.tex
+INPUT ./Chapters/2_background/sections/performaceWrappers.tex
+INPUT ./Chapters/2_background/sections/performaceWrappers.tex
+INPUT ./Chapters/2_background/sections/performaceWrappers.tex
+OUTPUT Chapters/2_background/sections/performaceWrappers.aux
+INPUT ./Chapters/2_background/sections/performaceWrappers.tex
+INPUT ./Chapters/2_background/sections/performaceWrappers.tex
+INPUT ./Chapters/2_background/sections/performaceWrappers.tex
+INPUT Chapters/2_background/sections/performaceWrappers.tex
+INPUT ./Chapters/2_background/sections/performaceWrappers.tex
+INPUT Chapters/2_background/sections/performaceWrappers.tex
+INPUT ./Chapters/2_background/sections/stateOfArt.tex
+INPUT ./Chapters/2_background/sections/stateOfArt.tex
+INPUT ./Chapters/2_background/sections/stateOfArt.tex
+OUTPUT Chapters/2_background/sections/stateOfArt.aux
+INPUT ./Chapters/2_background/sections/stateOfArt.tex
+INPUT ./Chapters/2_background/sections/stateOfArt.tex
+INPUT ./Chapters/2_background/sections/stateOfArt.tex
+INPUT Chapters/2_background/sections/stateOfArt.tex
+INPUT ./Chapters/2_background/sections/stateOfArt.tex
+INPUT Chapters/2_background/sections/stateOfArt.tex
+INPUT ./Chapters/2_background/sections/literatureGap.tex
+INPUT ./Chapters/2_background/sections/literatureGap.tex
+INPUT ./Chapters/2_background/sections/literatureGap.tex
+OUTPUT Chapters/2_background/sections/literatureGap.aux
+INPUT ./Chapters/2_background/sections/literatureGap.tex
+INPUT ./Chapters/2_background/sections/literatureGap.tex
+INPUT ./Chapters/2_background/sections/literatureGap.tex
+INPUT Chapters/2_background/sections/literatureGap.tex
+INPUT ./Chapters/2_background/sections/literatureGap.tex
+INPUT Chapters/2_background/sections/literatureGap.tex
+INPUT ./Chapters/2_background/sections/ROS.tex
+INPUT ./Chapters/2_background/sections/ROS.tex
+INPUT ./Chapters/2_background/sections/ROS.tex
+OUTPUT Chapters/2_background/sections/ROS.aux
+INPUT ./Chapters/2_background/sections/ROS.tex
+INPUT ./Chapters/2_background/sections/ROS.tex
+INPUT ./Chapters/2_background/sections/ROS.tex
+INPUT Chapters/2_background/sections/ROS.tex
+INPUT ./Chapters/2_background/sections/ROS.tex
+INPUT Chapters/2_background/sections/ROS.tex
+OUTPUT Chapters/2_background/sections/gazebo.aux
+INPUT ./Chapters/3_theory/theory.tex
+INPUT ./Chapters/3_theory/theory.tex
+INPUT ./Chapters/3_theory/theory.tex
+INPUT Chapters/3_theory/theory.tex
+INPUT ./Chapters/3_theory/theory.tex
+INPUT ./Chapters/3_theory/theory.tex
+INPUT Chapters/3_theory/theory.tex
+INPUT ./Chapters/4_method/method.tex
+INPUT ./Chapters/4_method/method.tex
+INPUT ./Chapters/4_method/method.tex
+INPUT Chapters/4_method/method.tex
+INPUT ./Chapters/4_method/method.tex
+INPUT ./Chapters/4_method/method.tex
+INPUT Chapters/4_method/method.tex
+INPUT ./Chapters/4_method/Sections/workspace.tex
+INPUT ./Chapters/4_method/Sections/workspace.tex
+INPUT ./Chapters/4_method/Sections/workspace.tex
+OUTPUT Chapters/4_method/Sections/workspace.aux
+INPUT ./Chapters/4_method/Sections/workspace.tex
+INPUT ./Chapters/4_method/Sections/workspace.tex
+INPUT ./Chapters/4_method/Sections/workspace.tex
+INPUT Chapters/4_method/Sections/workspace.tex
+INPUT ./Chapters/4_method/Sections/workspace.tex
+INPUT Chapters/4_method/Sections/workspace.tex
+INPUT ./Chapters/4_method/Sections/AMS construction.tex
+INPUT ./Chapters/4_method/Sections/AMS construction.tex
+INPUT ./Chapters/4_method/Sections/AMS construction.tex
+OUTPUT Chapters/4_method/Sections/AMS construction.aux
+INPUT ./Chapters/4_method/Sections/AMS construction.tex
+INPUT ./Chapters/4_method/Sections/AMS construction.tex
+INPUT ./Chapters/4_method/Sections/AMS construction.tex
+INPUT Chapters/4_method/Sections/AMS construction.tex
+INPUT ./Chapters/4_method/Sections/AMS construction.tex
+INPUT Chapters/4_method/Sections/AMS construction.tex
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx8.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx6.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmmib10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmmib8.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmmib6.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbsy10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy8.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy6.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmitt10.tfm
+INPUT ./Chapters/4_method/Sections/AMS Search.tex
+INPUT ./Chapters/4_method/Sections/AMS Search.tex
+INPUT ./Chapters/4_method/Sections/AMS Search.tex
+OUTPUT Chapters/4_method/Sections/AMS Search.aux
+INPUT ./Chapters/4_method/Sections/AMS Search.tex
+INPUT ./Chapters/4_method/Sections/AMS Search.tex
+INPUT ./Chapters/4_method/Sections/AMS Search.tex
+INPUT Chapters/4_method/Sections/AMS Search.tex
+INPUT ./Chapters/4_method/Sections/AMS Search.tex
+INPUT Chapters/4_method/Sections/AMS Search.tex
+INPUT ./Chapters/5_results/results.tex
+INPUT ./Chapters/5_results/results.tex
+INPUT ./Chapters/5_results/results.tex
+INPUT Chapters/5_results/results.tex
+INPUT ./Chapters/5_results/results.tex
+INPUT ./Chapters/5_results/results.tex
+INPUT Chapters/5_results/results.tex
+INPUT ./Chapters/6_analysis/analysis.tex
+INPUT ./Chapters/6_analysis/analysis.tex
+INPUT ./Chapters/6_analysis/analysis.tex
+INPUT Chapters/6_analysis/analysis.tex
+INPUT ./Chapters/6_analysis/analysis.tex
+INPUT ./Chapters/6_analysis/analysis.tex
+INPUT Chapters/6_analysis/analysis.tex
+INPUT ./Chapters/7_cont_work/contd_work.tex
+INPUT ./Chapters/7_cont_work/contd_work.tex
+INPUT ./Chapters/7_cont_work/contd_work.tex
+INPUT Chapters/7_cont_work/contd_work.tex
+INPUT ./Chapters/7_cont_work/contd_work.tex
+INPUT ./Chapters/7_cont_work/contd_work.tex
+INPUT Chapters/7_cont_work/contd_work.tex
+INPUT ./bu1.bbl
+INPUT bu1.bbl
+INPUT ./bu1.bbl
+INPUT bu1.bbl
+INPUT ./bu1.aux
+INPUT bu1.aux
+INPUT bu1.aux
+INPUT main.aux
+INPUT ./Chapters/1_introduction/sections/the robot.aux
+INPUT Chapters/1_introduction/sections/the robot.aux
+INPUT Chapters/1_introduction/sections/the robot.aux
+INPUT ./Chapters/1_introduction/sections/spacecraft_control.aux
+INPUT Chapters/1_introduction/sections/spacecraft_control.aux
+INPUT Chapters/1_introduction/sections/spacecraft_control.aux
+INPUT ./Chapters/1_introduction/sections/fault-tolerant-control.aux
+INPUT Chapters/1_introduction/sections/fault-tolerant-control.aux
+INPUT Chapters/1_introduction/sections/fault-tolerant-control.aux
+INPUT ./Chapters/1_introduction/sections/objective.aux
+INPUT Chapters/1_introduction/sections/objective.aux
+INPUT Chapters/1_introduction/sections/objective.aux
+INPUT ./Chapters/1_introduction/sections/scope.aux
+INPUT Chapters/1_introduction/sections/scope.aux
+INPUT Chapters/1_introduction/sections/scope.aux
+INPUT ./Chapters/1_introduction/sections/disposition.aux
+INPUT Chapters/1_introduction/sections/disposition.aux
+INPUT Chapters/1_introduction/sections/disposition.aux
+INPUT ./Chapters/2_background/sections/problemContext.aux
+INPUT Chapters/2_background/sections/problemContext.aux
+INPUT Chapters/2_background/sections/problemContext.aux
+INPUT ./Chapters/2_background/sections/basicsFTC.aux
+INPUT Chapters/2_background/sections/basicsFTC.aux
+INPUT Chapters/2_background/sections/basicsFTC.aux
+INPUT ./Chapters/2_background/sections/controlMethods.aux
+INPUT Chapters/2_background/sections/controlMethods.aux
+INPUT Chapters/2_background/sections/controlMethods.aux
+INPUT ./Chapters/2_background/sections/reconfigMeca.aux
+INPUT Chapters/2_background/sections/reconfigMeca.aux
+INPUT Chapters/2_background/sections/reconfigMeca.aux
+INPUT ./Chapters/2_background/sections/allocationMethods.aux
+INPUT Chapters/2_background/sections/allocationMethods.aux
+INPUT Chapters/2_background/sections/allocationMethods.aux
+INPUT ./Chapters/2_background/sections/decisionLayer.aux
+INPUT Chapters/2_background/sections/decisionLayer.aux
+INPUT Chapters/2_background/sections/decisionLayer.aux
+INPUT ./Chapters/2_background/sections/performaceWrappers.aux
+INPUT Chapters/2_background/sections/performaceWrappers.aux
+INPUT Chapters/2_background/sections/performaceWrappers.aux
+INPUT ./Chapters/2_background/sections/stateOfArt.aux
+INPUT Chapters/2_background/sections/stateOfArt.aux
+INPUT Chapters/2_background/sections/stateOfArt.aux
+INPUT ./Chapters/2_background/sections/literatureGap.aux
+INPUT Chapters/2_background/sections/literatureGap.aux
+INPUT Chapters/2_background/sections/literatureGap.aux
+INPUT ./Chapters/2_background/sections/ROS.aux
+INPUT Chapters/2_background/sections/ROS.aux
+INPUT Chapters/2_background/sections/ROS.aux
+INPUT ./Chapters/2_background/sections/gazebo.aux
+INPUT Chapters/2_background/sections/gazebo.aux
+INPUT Chapters/2_background/sections/gazebo.aux
+INPUT ./Chapters/4_method/Sections/workspace.aux
+INPUT Chapters/4_method/Sections/workspace.aux
+INPUT Chapters/4_method/Sections/workspace.aux
+INPUT ./Chapters/4_method/Sections/AMS construction.aux
+INPUT Chapters/4_method/Sections/AMS construction.aux
+INPUT Chapters/4_method/Sections/AMS construction.aux
+INPUT ./Chapters/4_method/Sections/AMS Search.aux
+INPUT Chapters/4_method/Sections/AMS Search.aux
+INPUT Chapters/4_method/Sections/AMS Search.aux
+INPUT ./main.out
+INPUT ./main.out
+INPUT /home/glim/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.600pk
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmmib8.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb

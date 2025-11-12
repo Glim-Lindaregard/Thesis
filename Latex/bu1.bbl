@@ -1,0 +1,96 @@
+\begin{thebibliography}{10}
+
+\bibitem{Bustan2014AdaptiveControl}
+Danyal Bustan, S.~K.Hosseini Sani, and Naser Pariz.
+\newblock {Adaptive fault-tolerant spacecraft attitude control design with
+  transient response control}.
+\newblock {\em IEEE/ASME Transactions on Mechatronics}, 19(4):1404--1411, 2014.
+
+\bibitem{Cao2013FaultMode}
+Lu~Cao, Xiaoqian Chen, and Tao Sheng.
+\newblock {Fault tolerant small satellite attitude control using adaptive
+  non-singular terminal sliding mode}.
+\newblock {\em Advances in Space Research}, 51(12):2374--2393, 6 2013.
+
+\bibitem{Durham1993ConstrainedAllocation}
+Wayne~C. Durham.
+\newblock {Constrained control allocation}.
+\newblock {\em Journal of Guidance, Control, and Dynamics}, 16(4):717--725,
+  1993.
+
+\bibitem{Guo2019Velocity-freeSaturation}
+Yong Guo, Bing Huang, Jin~hua Guo, Ai~jun Li, and Chang~qing Wang.
+\newblock {Velocity-free sliding mode control for spacecraft with input
+  saturation}.
+\newblock {\em Acta Astronautica}, 154:1--8, 1 2019.
+
+\bibitem{Jiang2012Fault-tolerantApproaches}
+Jin Jiang and Xiang Yu.
+\newblock {Fault-tolerant control systems: A comparative study between active
+  and passive approaches}.
+\newblock {\em Annual Reviews in Control}, 36(1):60--72, 2012.
+
+\bibitem{Johansen2013ControlSurvey}
+Tor~A. Johansen and Thor~I. Fossen.
+\newblock {Control allocation - A survey}, 2013.
+
+\bibitem{Khodaverdian2023Fault-tolerantSpacecraft}
+Maria Khodaverdian and Maryam Malekzadeh.
+\newblock {Fault-tolerant model predictive sliding mode control with fixed-time
+  attitude stabilization and vibration suppression of flexible spacecraft}.
+\newblock {\em Aerospace Science and Technology}, 139:108381, 8 2023.
+
+\bibitem{Ma2014ActuatorFeedback}
+Yajie Ma, Bin Jiang, Gang Tao, and Yuehua Cheng.
+\newblock {Actuator failure compensation and attitude control for rigid
+  satellite by adaptive control using quaternion feedback}.
+\newblock {\em Journal of the Franklin Institute}, 351(1):296--314, 1 2014.
+
+\bibitem{Mirshams2014PassiveThrusters}
+M.~Mirshams, M.~Khosrojerdi, and M.~Hasani.
+\newblock {Passive fault-tolerant sliding mode attitude control for flexible
+  spacecraft with faulty thrusters}, 10 2014.
+
+\bibitem{Rafiee2024ActiveFaults}
+Sajad Rafiee, Mohammadrasoul Kankashvar, Parisa Mohammadi, and Hossein Bolandi.
+\newblock {Active fault-tolerant attitude control based on Q-learning for rigid
+  spacecraft with actuator faults}.
+\newblock {\em Advances in Space Research}, 74(3):1261--1275, 8 2024.
+
+\bibitem{Shen2015Inertia-freeAllocation}
+Qiang Shen, Danwei Wang, Senqiang Zhu, and Eng~Kee Poh.
+\newblock {Inertia-free fault-tolerant spacecraft attitude tracking using
+  control allocation}.
+\newblock {\em Automatica}, 62:114--121, 12 2015.
+
+\bibitem{Tohidi2016FaultSpace}
+S.~S. Tohidi, A.~Khaki~Sedigh, and D.~Buzorgnia.
+\newblock {Fault tolerant control design using adaptive control allocation
+  based on the pseudo inverse along the null space}.
+\newblock {\em International Journal of Robust and Nonlinear Control},
+  26(16):3541--3557, 11 2016.
+
+\bibitem{Yang2023AdaptiveFaults}
+Yu~Xuan Yang, Ming Chen, Kai~Xiang Peng, and Man Yu.
+\newblock {Adaptive Sliding Mode Fault-tolerant Control for Attitude Tracking
+  of Spacecraft With Actuator Faults}.
+\newblock {\em International Journal of Control, Automation and Systems},
+  21(8):2587--2594, 8 2023.
+
+\bibitem{Yin2016ASystem}
+Shen Yin, Bing Xiao, Steven~X. Ding, and Donghua Zhou.
+\newblock {A Review on Recent Development of Spacecraft Attitude Fault Tolerant
+  Control System}, 5 2016.
+
+\bibitem{Zhang2008BibliographicalSystems}
+Youmin Zhang and Jin Jiang.
+\newblock {Bibliographical review on reconfigurable fault-tolerant control
+  systems}.
+\newblock {\em Annual Reviews in Control}, 32(2):229--252, 12 2008.
+
+\bibitem{Zou2011AdaptiveSpacecraft}
+An~Min Zou and Krishna~Dev Kumar.
+\newblock {Adaptive fuzzy fault-tolerant attitude control of spacecraft}.
+\newblock {\em Control Engineering Practice}, 19(1):10--21, 1 2011.
+
+\end{thebibliography}

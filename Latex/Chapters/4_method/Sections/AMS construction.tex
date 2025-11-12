@@ -1,28 +1,3 @@
-% \begin{tcolorbox}[
-%   enhanced,
-%   breakable,
-%   colback=black!3,        % light gray background
-%   colframe=tq,           % violet border
-%   coltitle=black,         % title text
-%   fonttitle=\bfseries,    % bold title font
-%   title=Visualization Strategy X.X — Reduced Slider,
-%   boxrule=0.8pt,
-%   arc=2mm,                % rounded corners
-%   left=6mm, right=6mm, top=3mm, bottom=3mm,
-%   boxed title style={
-%     colback=tq!20,       % soft violet title background
-%     colframe=tq,
-%     arc=2mm,
-%     top=1mm, bottom=1mm, left=2mm, right=2mm
-%   }
-% ]
-
-% Your text goes here.  
-% Describe the visualization concept, outline steps, or include small diagrams.  
-% Keep content concise — this box is meant to visually separate reasoning or strategy explanations from the main text.
-
-% \end{tcolorbox}
-
 A system like the slider is described as a redundant system. This means that there are more actuators than theoretically necessary to produce any desired moment. For such a system, a method must be devised to allocate control authority to specific actuators in order to deliver the desired moment. One such method involves storing all possible actuator combinations locally on board the system. It turns out that storing the actuator combinations as a geometric hypercube with each vertex representing one set of actuators, simplifies the search for optimal actuation,  which will become evident in later chapters. 
 
 This chapter details the process of transforming the set of possible actuator combinations into the corresponding set of attainable system moments, known as the \ac{AMS}
@@ -37,7 +12,7 @@ Explain how A transforms thruster forces  u into body moments
 Since the \ac{AMS} fully depends on the position, orientation, and number of actuators of the system, it is a good idea to define these in a concise way. This is done by creating a matrix where each column represents an actuator. Each entry, i, of the actuator column defines the actuator's ability to produce a moment along the $i^{\text{th}}$ spatial direction. 
 
 
-\x{For the slider, take thruster one (pos: top right (r,r), orientation: $\beta_1 = \frac{3±pi}{2}$. This thruster will produce a unit force in $-\y{y}$ equal to $\cos{\beta_1}$ together with a negative moment equal to $r(\cos{\beta_1} - \sin{\beta_1})$}
+%For the slider, take thruster one (pos: top right (r,r), orientation: $\beta_1 = \frac{3±pi}{2}$). This thruster will produce a unit force in $-\y{y}$ equal to $\cos{\beta_1}$ together with a negative moment equal to $r(\cos{\beta_1} - \sin{\beta_1})$
 
 \begin{tikzpicture}[scale=8, >=Stealth]
 
