@@ -1,0 +1,17 @@
+Reconfiguration mechanisms are the means by which a control system adapts after a fault has been detected. Their role is to modify how control actions are applied so that stability and performance can be maintained under degraded conditions. While the previous section focused on control strategies, this section considers the mechanisms that put those strategies into practice.
+
+\subsection{Controller Switching:} 
+Controller switching is one of the earliest forms of reconfiguration. When a fault is detected, the active controller is replaced by another designed for the new condition. This method is simple and effective if the fault scenarios are known in advance, but it requires a library of pre-designed controllers, which grows quickly with system complexity.
+
+Its success depends on fast and reliable fault detection, as poor or delayed switching can harm performance. Modern work often frames controller switching within hybrid control theory to improve robustness.
+
+\subsection{Parameter Update and Compensation}
+Another form of reconfiguration is to adjust the controller itself by updating parameters or adding compensation terms. Instead of switching controllers or redistributing commands, the existing control law is modified to account for the fault.
+
+This approach can maintain continuity in control and avoid the abrupt changes that come with switching. Its effectiveness, however, depends on accurate fault estimation and timely adaptation. If the update is slow or incorrect, performance can degrade significantly.
+
+\subsection{Control Allocation} 
+Control allocation addresses how overall control commands are distributed among the available actuators. After a fault, the mechanism adjusts this distribution so that the remaining actuators can still generate the required forces and moments as closely as possible.
+
+This strategy is particularly relevant in systems with actuator redundancy, such as spacecraft. Its strength lies in exploiting the extra degrees of freedom to maintain controllability despite failures. The specific algorithms for allocation—ranging from linear algebra methods to optimization—are discussed in detail in the following chapter.
+\todo[inline]{This might not belong here}

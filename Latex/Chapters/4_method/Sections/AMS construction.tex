@@ -1,0 +1,380 @@
+% \begin{tcolorbox}[
+%   enhanced,
+%   breakable,
+%   colback=black!3,        % light gray background
+%   colframe=tq,           % violet border
+%   coltitle=black,         % title text
+%   fonttitle=\bfseries,    % bold title font
+%   title=Visualization Strategy X.X — Reduced Slider,
+%   boxrule=0.8pt,
+%   arc=2mm,                % rounded corners
+%   left=6mm, right=6mm, top=3mm, bottom=3mm,
+%   boxed title style={
+%     colback=tq!20,       % soft violet title background
+%     colframe=tq,
+%     arc=2mm,
+%     top=1mm, bottom=1mm, left=2mm, right=2mm
+%   }
+% ]
+
+% Your text goes here.  
+% Describe the visualization concept, outline steps, or include small diagrams.  
+% Keep content concise — this box is meant to visually separate reasoning or strategy explanations from the main text.
+
+% \end{tcolorbox}
+
+A system like the slider is described as a redundant system. This means that there are more actuators than theoretically necessary to produce any desired moment. For such a system, a method must be devised to allocate control authority to specific actuators in order to deliver the desired moment. One such method involves storing all possible actuator combinations locally on board the system. It turns out that storing the actuator combinations as a geometric hypercube with each vertex representing one set of actuators, simplifies the search for optimal actuation,  which will become evident in later chapters. 
+
+This chapter details the process of transforming the set of possible actuator combinations into the corresponding set of attainable system moments, known as the \ac{AMS}
+
+
+
+
+Define A explicitly from thruster positions and orientation angles (referring to earlier figure).
+
+Explain how A transforms thruster forces  u into body moments 
+
+Since the \ac{AMS} fully depends on the position, orientation, and number of actuators of the system, it is a good idea to define these in a concise way. This is done by creating a matrix where each column represents an actuator. Each entry, i, of the actuator column defines the actuator's ability to produce a moment along the $i^{\text{th}}$ spatial direction. 
+
+
+\x{For the slider, take thruster one (pos: top right (r,r), orientation: $\beta_1 = \frac{3±pi}{2}$. This thruster will produce a unit force in $-\y{y}$ equal to $\cos{\beta_1}$ together with a negative moment equal to $r(\cos{\beta_1} - \sin{\beta_1})$}
+
+\begin{tikzpicture}[scale=8, >=Stealth]
+
+    \body
+
+    % --- top-left corner (thrusters off) ---
+    \thr{TL}{-1}{0}{off}{\TL}
+    \thr{TL}{0}{1}{off}{\TL}
+
+    % --- top-right corner (thrusters off) ---
+    \thr{TR}{1}{0}{on}{\TL}
+    \thr{TR}{0}{1}{off}{\TL}
+
+    % --- bottom-left corner (only downward thruster on) ---
+    \thr{BL}{-1}{0}{off}{\TL}
+    \thr{BL}{0}{-1}{off}{\TL}
+
+    % --- bottom-right corner (only downward thruster on) ---
+    \thr{BR}{1}{0}{off}{\TL}
+    \thr{BR}{0}{-1}{off}{\TL}
+
+    % --- coordinate frame ---
+    \coordinate (origin) at (0.55, 0);
+    \draw[->, thick] (origin) -- ++(0.15, 0) node[right] {$x$};
+    \draw[->, thick] (origin) -- ++(0, 0.15) node[above] {$y$};
+    \fill (origin) circle (0.01);
+
+    
+    
+    
+
+\end{tikzpicture}
+
+
+\begin{equation}
+    \boldsymbol{A} =
+    \begin{bmatrix}
+        \cos\beta_1 & \cdots & \cos\beta_8 \\[4pt]
+        \sin\beta_1 & \cdots & \sin\beta_8 \\[4pt]
+        (r^y_1 \cos\beta_1 - r^x_1 \sin\beta_1) & \cdots & (r^y_8 \cos\beta_8 - r^x_8 \sin\beta_8)
+    \end{bmatrix}
+\end{equation}
+
+
+
+
+
+\[
+    \boldsymbol{\Omega} = \{ \boldsymbol{u} \mid u_{i,min} \le u_i \le u_{i,max}, \boldsymbol{u} \in \mathbb{R}^m \} \subset \mathbb{R}^m \
+\]
+where in the case of the slider with 8 thrusters,
+\[
+    \boldsymbol{u} = \begin{bmatrix}  T_1 & T_2 & T_3 & T_4 & T_5 & T_6 & T_7& T_8 \end{bmatrix}^T
+    \quad , \quad u_{i,min} \le T_i \le u_{i,max}
+\]
+
+The boundary of $\boldsymbol{\Omega}$ denoted $\partial(\boldsymbol{\Omega)}$ contains the controls that map to the 
+
+
+\begin{figure}[h!]
+\centering
+\textbf{Down-scaled slider (8 thrusters; only the two bottom thrusters ON)}\\[0.5em]
+
+\begin{minipage}[t]{0.45\linewidth}
+\centering
+\begin{tikzpicture}[scale=8, >=Stealth]
+
+    \body
+    
+        % --- Letter ---
+    \node at (0,0) {\Large \textbf{B}};
+    
+    % --- top-left corner (thrusters off) ---
+    \thr{TL}{-1}{0}{off}{\TL}
+    \thr{TL}{0}{1}{off}{\TL}
+
+    % --- top-right corner (thrusters off) ---
+    \thr{TR}{1}{0}{off}{\TL}
+    \thr{TR}{0}{1}{off}{\TL}
+
+    % --- bottom-left corner (only downward thruster on) ---
+    \thr{BL}{-1}{0}{off}{\TL}
+    \thr{BL}{0}{-1}{on}{\TL}
+
+    % --- bottom-right corner (only downward thruster on) ---
+    \thr{BR}{1}{0}{off}{\TL}
+    \thr{BR}{0}{-1}{on}{\TL}
+
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}[t]{0.45\linewidth}
+\centering
+\begin{tikzpicture}[scale=8, >=Stealth]
+
+    \body
+
+    % --- Letter ---
+    \node at (0,0) {\Large \textbf{B}};
+
+
+    % --- top-left corner (thrusters off) ---
+    \thr{TL}{-1}{0}{on}{\TL}
+    \thr{TL}{0}{1}{off}{\TL}
+
+    % --- top-right corner (thrusters off) ---
+    \thr{TR}{1}{0}{on}{\TL}
+    \thr{TR}{0}{1}{off}{\TL}
+
+    % --- bottom-left corner (only downward thruster on) ---
+    \thr{BL}{-1}{0}{off}{\TL}
+    \thr{BL}{0}{-1}{off}{\TL}
+
+    % --- bottom-right corner (only downward thruster on) ---
+    \thr{BR}{1}{0}{off}{\TL}
+    \thr{BR}{0}{-1}{off}{\TL}
+
+    % % --- coordinate frame ---
+    % \coordinate (origin) at (0.55, 0);
+    % \draw[->, thick] (origin) -- ++(0.15, 0) node[right] {$x$};
+    % \draw[->, thick] (origin) -- ++(0, 0.15) node[above] {$y$};
+    % \fill (origin) circle (0.01);
+
+\end{tikzpicture}
+\end{minipage}
+
+\vspace{25pt}
+
+\begin{minipage}{0.45\linewidth}
+\centering
+\begin{tikzpicture}[scale=8, >=Stealth]
+
+    \body
+
+    % --- Letter ---
+    \node at (0,0) {\Large \textbf{C}};
+
+    % --- top-left corner (thrusters off) ---
+    \thr{TL}{-1}{0}{off}{\TL}
+    \thr{TL}{0}{1}{on}{\TL}
+
+    % --- top-right corner (thrusters off) ---
+    \thr{TR}{1}{0}{on}{\TL}
+    \thr{TR}{0}{1}{off}{\TL}
+
+    % --- bottom-left corner (only downward thruster on) ---
+    \thr{BL}{-1}{0}{on}{\TL}
+    \thr{BL}{0}{-1}{off}{\TL}
+
+    % --- bottom-right corner (only downward thruster on) ---
+    \thr{BR}{1}{0}{off}{\TL}
+    \thr{BR}{0}{-1}{on}{\TL}
+
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.45\linewidth}
+\centering
+\begin{tikzpicture}[scale=8, >=Stealth]
+
+   \body
+
+    % --- Letter ---
+    \node at (0,0) {\Large \textbf{D}};
+
+
+    % --- top-left corner (thrusters off) ---
+    \thr{TL}{-1}{0}{off}{\TL}
+    \thr{TL}{0}{1}{on}{\TL}
+
+    % --- top-right corner (thrusters off) ---
+    \thr{TR}{1}{0}{off}{\TL}
+    \thr{TR}{0}{1}{off}{\TL}
+
+    % --- bottom-left corner (only downward thruster on) ---
+    \thr{BL}{-1}{0}{off}{\TL}
+    \thr{BL}{0}{-1}{off}{\TL}
+
+    % --- bottom-right corner (only downward thruster on) ---
+    \thr{BR}{1}{0}{off}{\TL}
+    \thr{BR}{0}{-1}{on}{\TL}
+
+    % % --- coordinate frame ---
+    % \coordinate (origin) at (0.55, 0);
+    % \draw[->, thick] (origin) -- ++(0.15, 0) node[right] {$x$};
+    % \draw[->, thick] (origin) -- ++(0, 0.15) node[above] {$y$};
+    % \fill (origin) circle (0.01);
+
+\end{tikzpicture}
+\end{minipage}
+
+
+
+\caption{Eight thrusters (two per corner). Green arrows indicate active thrusters (on); red dashed arrows indicate inactive thrusters (off). The two bottom thrusters are active, producing upward thrust and a net lift.}
+\label{fig:simple_slider_onoff}
+\end{figure}
+
+
+
+
+
+
+\begin{equation}
+    \boldsymbol{\psi_d}^{n\times 1} = \boldsymbol{Au} = \begin{bmatrix} \color{x}f_x & \color{y}f_y &\color{tq} \tau\end{bmatrix}^T
+\end{equation}
+
+Where $\boldsymbol{u}^{m\times 1}$ is the control vector:
+
+
+The set of all possible control inputs produced by the m thrusters span a convex hull in $\mathbb{R}^m$ control space: 
+
+
+
+
+The control space is then transformed to the \ac{AMS} under the A map:
+
+\[
+    \boldsymbol{\Phi} = \{\boldsymbol{\psi} \mid \boldsymbol{\psi} = \boldsymbol{Au}, \boldsymbol{u} \in \boldsymbol{\Omega}\} \subset \mathbb{R}^n
+\]
+
+\todo[inline]{I dont know how detailed to describe the AMS construction method and what to reference to the original paper.}
+
+
+% --- Plot simple slider --- 
+\begin{figure}
+    \centering
+    \textbf{Down-scaled slider}\\[0.5em]
+    \begin{tikzpicture}[scale=5, >=Stealth]
+        \def\a{0.2}
+    
+        % --- main coordinates ---
+        \coordinate (v0) at (0,0);
+        \coordinate (v1) at (2*\a,0);
+        \coordinate (v2) at (0,2*\a);
+        \coordinate (v3) at (-2*\a,-2*\a);
+    
+        \coordinate (s1) at (\a, \a);
+        \coordinate (s2) at (-\a, \a);
+        \coordinate (s3) at (-\a, -\a);
+        \coordinate (s4) at (\a, -\a);
+    
+        % --- transparent gray square ---
+        \filldraw[fill=gray, fill opacity=0.2, draw=black, thick]
+            (s1)--(s2)--(s3)--(s4)--cycle;
+    
+        % --- red vectors ---
+        \draw[red, thick, -Stealth] (v0) -- (v1) node[pos=1,right,black] {u1};
+        \draw[red, thick, -Stealth] (v0) -- (v2) node[pos=1,above,black] {u3};
+        \draw[red, thick, -Stealth] (v0) -- (v3) node[pos=1,below left,black] {u2};
+
+    
+        % --- coordinate system to the right ---
+        \coordinate (origin) at (0.6, 0); % move it wherever looks good
+        \draw[->, black, thick] (origin) -- ++(0.15, 0) node[right] {$x$};
+        \draw[->, black, thick] (origin) -- ++(0, 0.15) node[above] {$y$};
+        \fill[black] (origin) circle (0.01); % small dot at the origin
+    \end{tikzpicture}
+
+    \caption{Red arrows represent the three thrusters, one in \x{\texttt{+x}}, one in \y{\texttt{+y}} and one in (\x{\texttt{-x}},\y{\texttt{-y}}). These thrusters only produce thrust in \x{\texttt{x}} and \y{\texttt{y}}, no moment or rotation.}
+    \label{fig:simpleSlider}
+\end{figure}
+
+% --- Plot 3D CS and 2D AMS ---
+\begin{figure}
+    \centering
+    \textbf{3D Control Space to 2D AMS Visualization}\\[0.5em]
+    \tdplotsetmaincoords{75}{5}
+    \begin{tikzpicture}[tdplot_main_coords, scale = 3,>=Stealth]
+
+        % --- 2D hull points (z=0 plane) ---
+        \coordinate (p0) at (0,0,0);
+        \coordinate (p1) at (0,1,0);
+        \coordinate (p2) at (1,1,0);
+        \coordinate (p3) at (-1,0,0);
+        \coordinate (p4) at (1,0,0);
+        \coordinate (p5) at (0,-1,0);
+        \coordinate (p6) at (-1,-1,0);
+        
+    
+        % --- Hull polygon ---
+        \filldraw[fill = cyan, fill opacity = 0.5, draw=black, thick]
+            (p6) -- (p5) -- (p4) -- (p2) -- (p1) -- (p3) -- cycle;
+    
+        % --- Optionally mark vertices ---
+        \foreach \p in {p1,p2,p3,p4,p5,p6}
+            \fill[red] (\p) circle (0.04);
+
+        % --- Vertices ---
+        \coordinate (v1) at (0,0,0);
+        \coordinate (v2) at (1,0,0);
+        \coordinate (v3) at (1,1,0);
+        \coordinate (v4) at (0,1,0);
+        \coordinate (v5) at (0,0,1);
+        \coordinate (v6) at (1,0,1);
+        \coordinate (v7) at (1,1,1);
+        \coordinate (v8) at (0,1,1);
+
+       % --- Red arrows ---
+       \foreach \v/\p in {
+           v8/p3,
+           v6/p2,
+           v5/p1,
+           v4/p6,
+           v3/p5}
+        {
+        \draw[red,thick,-Stealth] (\v) -- (\p);
+        }
+
+        \draw[red, thick,-Stealth] (v7) -- (p0) node[black, pos = 0.98, anchor = north east] {$\mathbb{O}$};
+
+
+        % --- Faces ---
+        % bottom
+        \filldraw[fill = cyan!99!black, draw = black, fill opacity = 0.2, thick] (v1)--(v2)--(v3)--(v4)--cycle;
+        % front
+        \filldraw[fill = cyan!99!black, draw = black, fill opacity = 0.2, thick] (v2)--(v6)--(v7)--(v3)--cycle;
+        % right
+        \filldraw[fill = cyan!99!black, draw = black, fill opacity = 0.2, thick] (v1)--(v5)--(v6)--(v2)--cycle;
+        % left
+        \filldraw[fill = cyan!99!black, draw = black, fill opacity = 0.2, thick] (v4)--(v8)--(v5)--(v1)--cycle;
+        % back
+        \filldraw[fill = cyan!99!black, draw = black, fill opacity = 0.2, thick] (v3)--(v7)--(v8)--(v4)--cycle;
+        % top
+        \filldraw[fill = cyan!99!black, draw = black, fill opacity = 0.2, thick] (v5)--(v6)--(v7)--(v8)--cycle;
+
+        % --- Coordinate system aligned with cube (top-right corner plane) ---
+        \coordinate (originCS) at (1.3, 1.1, 0);   % place it near top-right corner of cube
+        
+        % axis arrows: x→ right, y→ up in 2D plane, z→ upward (3D)
+        \draw[->, black, thick] (originCS) -- ++(0.4, 0, 0) node[anchor=west] {$x$};
+        \draw[->, black, thick] (originCS) -- ++(0, -0.8, 0) node[anchor=south east] {$y$};
+        \draw[->, black, thick] (originCS) -- ++(0, 0, 0.4) node[anchor=south] {$z$};
+        \fill[black] (originCS) circle (0.015);
+
+    \end{tikzpicture}
+    
+    \caption{Control space (3D) to AMS (2D) transformation under $A = \begin{bmatrix}
+        1 & -1 & 0 \\ 0 & -1 & 1
+    \end{bmatrix}$. Red arrows represent vertex mappings from control space to AMS. ex: $[0\ 1\ 1]$ in control space maps to $[-1\ 0]$ in the AMS. This is saying that if thruster 2 and 3 is on we should move in -x, which is constantan with figure}
+    \label{fig:simpleTransform}
+    
+\end{figure} 
