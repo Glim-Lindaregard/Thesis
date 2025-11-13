@@ -1,9 +1,0 @@
-Methods for allocating controll outputs to functioning actuators. 
-
-\subsection{Pseudoinverse}
-One of the most common allocation techniques is based on the Moore–Penrose pseudoinverse, which provides the least-squares actuator command vector that reproduces a desired torque or force. For spacecraft, this has been widely applied as a baseline allocation scheme because of its simplicity and computational efficiency \cite{Johansen2013ControlSurvey,Shen2015Inertia-freeAllocation}. A weighted pseudoinverse can down-weight faulty actuators or prioritize certain axes, while the null-space freedom of the solution allows secondary objectives such as fuel balancing or plume avoidance to be incorporated without disturbing the primary torque \cite{Durham1993ConstrainedAllocation}. The main limitation is that pseudoinverse allocation does not enforce actuator constraints (saturation, minimum impulse bit), which may lead to infeasible commands in practice.
-
-\now
-
-
-
