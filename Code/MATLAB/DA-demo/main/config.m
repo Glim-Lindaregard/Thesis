@@ -5,6 +5,11 @@ cfg = struct();
 cfg.N = 0;
 cfg.beta = zeros(8,1);
 
+cfg.Ts = 0.01;
+
+cfg.mass    = 4.436; % [kg]
+cfg.I_zz = 1.092; % [kgm^2]
+
 
 cfg.u_max = 0.7*ones(8,1);      %Max thruster outputs [N]
 cfg.u_min = zeros(8,1);         %Min thruster outputs [N]

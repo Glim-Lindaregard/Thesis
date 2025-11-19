@@ -25,20 +25,22 @@ lgHandles = [];
 lgLabels  = {};
 
 figure('Color',BackgroundColor); hold on
+set(gcf,'Renderer','painters');
+
 count = size(U,3);
 
 scale = 2;
 center = [0 0 0];
 
 axis manual; axis equal; axis vis3d; ...
-    xlim([-scale,scale]); ylim([-scale,scale]); zlim([-scale/2,scale/2]);
-view(45,30) 
+    xlim([-scale,scale]); ylim([-scale,scale]); zlim([-scale/4,scale/4]);
+view(35,20) 
 
 
 for k = 1:count
     %Get a facets verteces.
     Uk = U(:,:,k);
-    Vk = Asys*Uk;
+    Vk = Asys*Uk
     verts = Vk;
 
 
@@ -54,7 +56,7 @@ for k = 1:count
     f = [1 2 3 4];
 
     %Plot facets
-    if k == index
+    if k == index && (ShowBasis || ShowProduced)
         patch('Faces',f,'Vertices',tris, ...
       'FaceColor','r','FaceAlpha',0.5, ...
       'EdgeColor',EdgeColor,'EdgeAlpha',EdgeAlpha,'LineWidth',LineWidth, ...
@@ -78,7 +80,7 @@ for k = 1:count
 
 
     %Make selected facet edges red
-    if k == index
+    if k == index && (ShowBasis || ShowProduced)
         for i = 1:4
             %Edges %Put back on if edges look wierd
             outline = [A;B;C;D;A]; 
@@ -131,7 +133,7 @@ if ShowBasis
     a = abc(1); b = abc(2); c = abc(3);
    
     
-    M = [adi,  b*(adj-adi),  c*(adk - adi)]; 
+    M = [adi,  b*(adj-adi),  c*(adk - adi)]
     M2 = [adi-center' adj adk];
     hold on
 
@@ -160,13 +162,19 @@ end
 %Grids and axis
 box on; grid on
 ax = gca;
-ax.GridColor = GridColor; ax.GridAlpha = GridAlpha; ax.GridLineStyle = GridStyle;
-ax.MinorGridLineStyle = GridStyle; ax.XMinorGrid='on'; ax.YMinorGrid='on'; ax.ZMinorGrid='on';
+ax.GridColor = GridColor; ax.GridAlpha = GridAlpha; %ax.GridLineStyle = GridStyle;
+ax.GridLineStyle = GridStyle; ax.XMinorGrid='off'; ax.YMinorGrid='off'; ax.ZMinorGrid='off';
 ax.FontSize = FontSize;
+ax.LineWidth = LineWidth;
+ax.Color = 'white';
+ax.Projection = 'perspective';
+ax.XColor = GridColor;
+ax.YColor = GridColor;
+ax.ZColor = GridColor;
 
 lbl = getfield_with_default(opts,'AxisLabels',{'F_{x} (N)','F_{y} (N)','T_{z} (N·m)'});
 xlabel(lbl{1}); ylabel(lbl{2}); zlabel(lbl{3});
-title('Attainable Moment Set');
+title('Attainable Moment Set','Color',GridColor);
 
 if ~isempty(lgHandles)
     legend(lgHandles,lgLabels{:});
@@ -176,8 +184,9 @@ end
 if LightingOn
     camlight('headlight'); material dull; lighting gouraud;
 end
-
+exportgraphics(gcf, 'AMS.pdf', 'ContentType','vector','Padding',5);
 end
+
 
 %Options helper
 function v = getfield_with_default(s,name,def)

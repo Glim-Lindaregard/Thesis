@@ -2,8 +2,9 @@ function  test2D()
 close all;
 
 % --- Data setup ---
-A = [1 -1  0;
-     0  -1  1];
+A = [1 0 -1 ;
+     0  1 -1];
+
 
 % Full 3D control cube vertices
 Uverts = [0 0 0 0 1 1 1 1;   % u1

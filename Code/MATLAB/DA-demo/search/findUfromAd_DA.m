@@ -30,7 +30,7 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
         adk = Vk(:,4);
 
   
-        M = [ad,  adi - adj,  adi - adk]; 
+        M = [ad,  adi - adj,  adi - adk];
 
         if rcond(M) < tol
             x =pinv(M)*adi;
