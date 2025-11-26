@@ -1,5 +1,5 @@
 function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
-    found = 0; k = 0; singular = 0;
+    found = 0; k = 0;
     tol = 1e-15;
     N = size(A,2);
 
@@ -9,11 +9,10 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
     x = zeros(3, 1);
     while ~found
         k = k+1;
-        Uk = U(:,:,k);
-        Vk = A*Uk;
-
-        if k == size(U,3)
+        
+        if k == size(U,3)+1
             fprintf("No such moment possible\n")
+            %ads(:,size(ads,2)+1) = ad;
             uOut = zeros(N,1);
             found = 1;
             index = 0;
@@ -21,8 +20,10 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
             continue;
         end
         
-
+        Uk = U(:,:,k);
+        Vk = A*Uk;
         adi = Vk(:,1);
+
         if all(abs(adi)< tol)
             adi = Vk(:,3);
         end

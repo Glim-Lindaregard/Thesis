@@ -93,47 +93,47 @@
 % disp(struct('top_right',[Qpp(1),Qpp(2)],'top_left',[Qmp(1), Qmp(2)],...
 %     'bottom_left',Qmm,'bottom_right',Qpm))
 
-clear all;
-
-
-
-
-cfg0  = config();
-
-m     = size(cfg0.A,2);                  % should be 8
-
-
-uCache = struct([]);
-
-
-for k = 0:(2^m - 1)
-    mask = logical(bitget(k, 1:m));   % 1 = healthy, 0 = failed
-    
-    cfgi = cfg0;
-    cfgi.A(:, ~mask) = 0;             % zero failed thruster columns
-    cfgi.u_min(~mask) = 0;            % zero min/max ranges
-    cfgi.u_max(~mask) = 0;
-    cfgi.N = m;                       % keep same dimension
-    if k == 160
-        h=0;
-    end
-    Ui= Copy_of_buildAMS_row(cfgi);
-    uCache(k+1).U = Ui;
-    uCache(k+1).A = cfgi.A;
-    uCache(k+1).mask = mask;
-end
-
-
-
-healthy = bin2dec('00100001') + 1; % [8,7,6,5,4,3,2,1]
-
-ad = [-1 0 -0.098]';
-Uc = uCache(healthy).U;
-Ac = uCache(healthy).A;
-
-[Uout,index,x] = findUfromAd_DA(ad,Uc,Ac)
-
-ap = Ac*Uout;
+% clear all;
+% 
+% 
+% 
+% 
+% cfg0  = config();
+% 
+% m     = size(cfg0.A,2);                  % should be 8
+% 
+% 
+% uCache = struct([]);
+% 
+% 
+% for k = 0:(2^m - 1)
+%     mask = logical(bitget(k, 1:m));   % 1 = healthy, 0 = failed
+% 
+%     cfgi = cfg0;
+%     cfgi.A(:, ~mask) = 0;             % zero failed thruster columns
+%     cfgi.u_min(~mask) = 0;            % zero min/max ranges
+%     cfgi.u_max(~mask) = 0;
+%     cfgi.N = m;                       % keep same dimension
+%     if k == 160
+%         h=0;
+%     end
+%     Ui= Copy_of_buildAMS_row(cfgi);
+%     uCache(k+1).U = Ui;
+%     uCache(k+1).A = cfgi.A;
+%     uCache(k+1).mask = mask;
+% end
+% 
+% 
+% 
+% healthy = bin2dec('00100001') + 1; % [8,7,6,5,4,3,2,1]
+% 
+% ad = [-1 0 -0.098]';
+% Uc = uCache(healthy).U;
+% Ac = uCache(healthy).A;
+% 
+% [Uout,index,x] = findUfromAd_DA(ad,Uc,Ac)
+% 
+% ap = Ac*Uout;
 
 
 
@@ -153,12 +153,12 @@ AMSopts = struct( ...
         'fps', 10, ...
         'Fancy', false, ...
         'Index', index, ...
-        'ShowProduced', true,...
+        'ShowProduced', false,...
         'ShowDesired', true,...
-        'ShowBasis', true);
+        'ShowBasis', false);
 
 %visualizeAMS(Uc,Ac,1,AMSopts,1,ad,1);
 
-visualizeAMS(Uc,Ac,1,AMSopts,ap,ad,x);
+visualizeAMS(Uc,Ac,1,AMSopts,0,ad,0);
 
 

@@ -24,6 +24,8 @@ ShowBasis           = getfield_with_default(opts,'ShowBasis',true);
 lgHandles = [];
 lgLabels  = {};
 
+global ads;
+
 figure('Color',BackgroundColor); hold on
 set(gcf,'Renderer','painters');
 
@@ -40,7 +42,7 @@ view(35,20)
 for k = 1:count
     %Get a facets verteces.
     Uk = U(:,:,k);
-    Vk = Asys*Uk
+    Vk = Asys*Uk;
     verts = Vk;
 
 
@@ -118,7 +120,7 @@ end
 
 if ShowDesired
     desiredHandle = quiver3(center(1),center(2),center(3),1*ad(1),1*ad(2),1*ad(3)...
-    ,'off','Color','g','LineWidth',0.5,'MaxHeadSize',0.8);
+    ,'off','Color','r','LineWidth',2,'MaxHeadSize',0.8);
 
     lgHandles(end+1) = desiredHandle;
     lgLabels{end+1}  = 'Desired moment';
@@ -157,8 +159,6 @@ end
 
 
 
-
-
 %Grids and axis
 box on; grid on
 ax = gca;
@@ -166,7 +166,7 @@ ax.GridColor = GridColor; ax.GridAlpha = GridAlpha; %ax.GridLineStyle = GridStyl
 ax.GridLineStyle = GridStyle; ax.XMinorGrid='off'; ax.YMinorGrid='off'; ax.ZMinorGrid='off';
 ax.FontSize = FontSize;
 ax.LineWidth = LineWidth;
-ax.Color = 'white';
+ax.Color = [1 1 1]*0.1;
 ax.Projection = 'perspective';
 ax.XColor = GridColor;
 ax.YColor = GridColor;

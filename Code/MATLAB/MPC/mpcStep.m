@@ -1,68 +1,36 @@
-function u = mpcStep(xk, xref, MPC)
-% xk   : current state (nx x 1)
-% xref : reference state (nx x 1)
-% MPC  : struct with A,B,Q,R,Np,Nc,u_min,u_max
+function ad_k = mpcStep(mpc, xCurrent, xRef)
+% MPC_STEP_WRENCH  One MPC step: current state -> desired wrench a_d.
+%
+% Inputs:
+%   mpc       : struct from mpc_init_wrench
+%   x_current : 6x1 current state
+%   x_ref     : 6x1 reference state
+%
+% Output:
+%   ad_k      : 3x1 desired wrench [Fx; Fy; tau] at current step
 
-    A  = MPC.Ad;
-    B  = MPC.Bd;
-    Q  = MPC.Q;
-    R  = MPC.R;
-    Np = MPC.Np;
-    Nc = MPC.Nc;
+    import casadi.*
 
-    [nx,nu] = size(B);
+    nStates   = mpc.nStates;
+    nControls = mpc.nControls;
+    N          = mpc.N;
 
-    % --- Prediction matrices Sx, Su ---
-    Apow = repmat(eye(nx), 1, 1, Np);
-    for i = 2:Np
-        Apow(:,:,i) = Apow(:,:,i-1)*A;
-    end
+    % pack parameters P = [x0; x_ref]
+    P = [xCurrent; xRef];
 
-    Sx = zeros(nx*Np, nx);
-    Su = zeros(nx*Np, nu*Nc);
+    % initial guess (cold start for now)
+    x0opt = zeros(mpc.OPTvariablesLen, 1);
 
-    for i = 1:Np
-        Sx_i = Apow(:,:,i);
-        Sx((i-1)*nx+1:i*nx,:) = Sx_i;
+    % solve NLP
+    sol = mpc.solver('x0', x0opt, ...
+                     'lbx', mpc.lbx, 'ubx', mpc.ubx, ...
+                     'lbg', mpc.lbg, 'ubg', mpc.ubg, ...
+                     'p',  P);
 
-        for j = 1:Nc
-            if j <= i
-                Aij = Apow(:,:,i-j+1);
-                row = (i-1)*nx+1:i*nx;
-                col = (j-1)*nu+1:j*nu;
-                Su(row,col) = Aij*B;
-            end
-        end
-    end
+    solX = full(sol.x);
 
-    % --- Cost matrices ---
-    Qbar = kron(eye(Np), Q);
-    Rbar = kron(eye(Nc), R);
-
-    Xref = repmat(xref, Np, 1);
-    Sx_xk = Sx*xk;
-
-    H = 2*(Su'*Qbar*Su + Rbar);
-    f = 2*Su'*Qbar*(Sx_xk - Xref);
-
-    % --- Input bounds ---
-    umin = MPC.u_min(:);
-    umax = MPC.u_max(:);
-    lb = repmat(umin, Nc, 1);
-    ub = repmat(umax, Nc, 1);
-
-    % --- Solve QP ---
-    if isfield(MPC,'qp_opts')
-        opts = MPC.qp_opts;
-    else
-        opts = optimoptions('quadprog','Display','off');
-    end
-
-    U = quadprog(H, f, [], [], [], [], lb, ub, [], opts);
-
-    if isempty(U)
-        u = zeros(nu,1);
-    else
-        u = U(1:nu);
-    end
+    % extract first control input a_d(k)
+    nX    = nStates*(N+1);
+    U_sol = reshape(solX(nX+1:end), nControls, N);
+    ad_k  = U_sol(:,1);
 end

@@ -1,13 +1,16 @@
-function animateTrajectory(simout, ref, cfg, opts, failureTime)
-% ANIMATETRAJECTORY  Animate slider pose + thrusters with multi-failure markers.
-%   healthy: scalar index where (healthy-1) is the 8-bit mask (1=healthy, 0=failed)
-%            with bit order LSB=thruster 1 ... MSB=thruster 8.
-%            Example: healthy = bin2dec('10111111') + 1  (thruster 7 failed).
-%   failureTime: seconds after which failed thrusters get a red marker.
+function animateTrajectory(t, X_cl, U_cl, cfg, opts, failureTime)
+% ANIMATETRAJECTORY_ARRAYS  Animate slider pose + thrusters using arrays.
+%   t    : 1×N time vector (seconds)
+%   X_cl : 6×N state trajectory [x;y;theta;vx;vy;r]
+%   U_cl : 8×(N-1) or 8×N control sequence (thruster commands)
+%   ref  : [x_ref; y_ref; theta_ref] or [] for no ref
+%   cfg  : struct with fields A, pos (8×2), beta (8×1), a (body radius)
+%   opts : options struct (optional, same fields as before)
+%   failureTime : scalar or 1×8 vector (seconds) for per-thruster failure
 
     % ---- defaults
-    if nargin < 5 || isempty(failureTime), failureTime = 0; end
-    if nargin < 4 || isempty(opts),        opts        = struct(); end
+    if nargin < 6 || isempty(failureTime), failureTime = 0; end
+    if nargin < 5 || isempty(opts),        opts        = struct(); end
     if ~isfield(opts,'tol_u'),        opts.tol_u      = 1e-6;      end
     if ~isfield(opts,'fps'),          opts.fps        = 60;        end
     if ~isfield(opts,'saveVideo'),    opts.saveVideo  = false;     end
@@ -17,24 +20,25 @@ function animateTrajectory(simout, ref, cfg, opts, failureTime)
 
     % ---- meta
     m = size(cfg.A,2);
+    ref = cfg.xRef;
 
-    % ---- logs
-    logs     = simout.logsout;
+    % ---- logs (from arrays instead of simout)
+    % t is already a double time vector, 1×N or N×1
+    t = t(:)';     % force row
 
-    state_ts = logs.get('State').Values;
-    t_state  = state_ts.Time;
-    Xraw     = state_ts.Data;
-    x = Xraw(:,1); y = Xraw(:,2); th = Xraw(:,3);
-    %t = seconds(t_state - t_state(1)); t = t(:);
-    t  = t_state - t_state(1);      % double seconds
+    % X_cl is 6×N
+    Xraw = X_cl.';
+    x  = Xraw(:,1);
+    y  = Xraw(:,2);
+    th = Xraw(:,3);
 
-
-    u_ts = logs.get('u').Values;
-    %tu   = seconds(u_ts.Time - u_ts.Time(1)); tu = tu(:);
-    tu = u_ts.Time - u_ts.Time(1);  % double seconds
-    U    = normalizeU(u_ts.Data);                 % 8×N
-    if ~isequal(size(U,2), numel(t)) || any(t ~= tu)
-        U = interp1(tu, U.', t, 'previous','extrap').';  % 8×N
+    % U_cl is 8×(N-1) or 8×N; normalize to 8×N
+    U = normalizeU(U_cl);
+    if size(U,2) == numel(t)-1
+        % pad with last control so we have one u per frame
+        U = [U, U(:,end)];
+    elseif size(U,2) ~= numel(t)
+        error('U_cl must have N or N-1 columns to match t.');
     end
 
     % ---- geometry / scales
@@ -72,9 +76,9 @@ function animateTrajectory(simout, ref, cfg, opts, failureTime)
     % graphics objects
     [hBody, hPts, hQuiv] = createGraphics(body_r);   % green thruster arrows
     headLen  = 1.0*body_r;
-    % body axes: x_b^+ (blue) and y_b^+ (yellow)
-    hX = quiver(NaN,NaN,NaN,NaN,0,'LineWidth',1.5,'MaxHeadSize',2.5,'Color','b'); % x_b^+
-    hY = quiver(NaN,NaN,NaN,NaN,0,'LineWidth',1.5,'MaxHeadSize',2.5,'Color','y'); % y_b^+
+    % body axes: x_b^+ (red) and y_b^+ (blue)
+    hX = quiver(NaN,NaN,NaN,NaN,0,'LineWidth',1.5,'MaxHeadSize',2.5,'Color','r'); % x_b^+
+    hY = quiver(NaN,NaN,NaN,NaN,0,'LineWidth',1.5,'MaxHeadSize',2.5,'Color','b'); % y_b^+
 
     % --- multi-failure red markers (one per thruster, initially hidden)
     hBroken = gobjects(m,1);
@@ -83,20 +87,15 @@ function animateTrajectory(simout, ref, cfg, opts, failureTime)
             'LineWidth',1.8,'MaxHeadSize',2.5,'Color',[0.9 0.2 0.2], ...
             'HandleVisibility','off','Visible','off');
 
-        set(hBroken(i), 'AutoScale', 'off', 'Clipping','off');  % force size / on-top draw
-        uistack(hBroken(i), 'top');                             % draw above green arrows
-
+        set(hBroken(i), 'AutoScale', 'off', 'Clipping','off');
+        uistack(hBroken(i), 'top');
     end
 
     legend([trace, hQuiv(1)], {'trajectory','active thruster'}, ...
            'TextColor',[0.95 0.95 0.95], 'Location','best');
 
-
-    % ---- per-thruster failure times (1×m, seconds; Inf = never fails)
-    % ---- per-thruster failure times (1×m; Inf = never fails)
+    % ---- per-thruster failure times
     ft = prepareFailureTimes_onlyTimes(failureTime, m);
-
-
 
     % ---- animation loop
     N = numel(t);
@@ -129,21 +128,21 @@ function animateTrajectory(simout, ref, cfg, opts, failureTime)
         dir_w   = (R*dir_l.').';               % world-frame dirs
         L       = opts.arrow_scale * uf;       % signed lengths
         Ux      = dir_w(:,1).*L;  Uy = dir_w(:,2).*L;
-        
-        tk = t(k);                              % current time (double seconds)
-        
+
+        tk = t(k);
+
         for i = 1:m
-            isFailedNow = (tk >= ft(i));        % per-thruster gating
+            isFailedNow = (tk >= ft(i));
             set(hQuiv(i), 'XData',thr_w(i,1), 'YData',thr_w(i,2), ...
                           'UData',Ux(i),      'VData',Uy(i), ...
                           'Visible', tern(active(i) && ~isFailedNow, 'on','off'));
         end
-        
-        % red broken markers (per thruster; appear at/after its own failure time)
+
+        % red broken markers
         Lb = opts.broken_len * body_r;
         for i = 1:m
             if tk >= ft(i)
-                bdir = dir_w(i,:);              % world-frame nozzle direction
+                bdir = dir_w(i,:);
                 set(hBroken(i), 'XData',thr_w(i,1), 'YData',thr_w(i,2), ...
                                 'UData',Lb*bdir(1), 'VData',Lb*bdir(2), ...
                                 'Visible','on');
@@ -152,16 +151,15 @@ function animateTrajectory(simout, ref, cfg, opts, failureTime)
             end
         end
 
-
         drawnow limitrate;
 
         if k < N
-            %dt = seconds(t(min(k+1,N)) - t(k));
             dt = t(min(k+1,N)) - t(k);
             pause(opts.simSpeed*max(0, min(dt_target, dt)));
         end
     end
 end
+
 
 % ----------------------- helpers (same file) -----------------------------
 function U = normalizeU(D)

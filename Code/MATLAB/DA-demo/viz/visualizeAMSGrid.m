@@ -70,7 +70,7 @@ function visualizeAMSGrid(uCache, failureTime, opts, aProduced, ad)
     [zmin,zmax] = bounds(allXYZ(:,3));
 
     % Pad a bit for arrows
-    pad = 0.05 * max([abs(xmax-xmin), abs(ymax-ymin), abs(zmax-zmin), 1]);
+    pad = 0.01 * max([abs(xmax-xmin), abs(ymax-ymin), abs(zmax-zmin), 1]);
     xl = [xmin-pad, xmax+pad];
     yl = [ymin-pad, ymax+pad];
     zl = [zmin-pad, zmax+pad];
@@ -80,7 +80,7 @@ function visualizeAMSGrid(uCache, failureTime, opts, aProduced, ad)
 
     % --- Figure ---
     fig = figure('Color',BackgroundColor, 'Name','AMS Grid'); %#ok<NASGU>
-    set(gcf, 'Position', [100 100 1400 900]);  % make the window bigger
+    set(gcf, 'Position', [80 80 1920 1080]);  % make the window bigger
 
 
     for s = 1:S
