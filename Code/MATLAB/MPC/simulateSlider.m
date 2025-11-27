@@ -1,4 +1,4 @@
-function [xHist, adHist, uHist, t] = simulateSlider(cfg,uCashe, failureTime)
+function [xHist, adHist, uHist,aRealHist, t] = simulateSlider(cfg,uCashe, failureTime)
 % SIMULATE_SLIDER_MPC_ALLOC
 %   Closed-loop sim: wrench-MPC + AMS-based allocation + failures.
 %
@@ -44,36 +44,41 @@ function [xHist, adHist, uHist, t] = simulateSlider(cfg,uCashe, failureTime)
     adHist = zeros(3, Nt-1);
     uHist  = zeros(8, Nt-1);   % assuming 8 thrusters total
 
+    aRealHist = zeros(3, Nt-1);
+
     % --- main loop ---
     for k = 1:Nt-1
         xk = xHist(:,k);
-
-        % 1) MPC: current state -> desired wrench a_d(k)
-        ad_k = mpcStep(mpc, xk, xRef);    % 3x1
-        adHist(:,k) = ad_k;
-
-        % 2) Failure healthyIndex at this step
-        %    You decide whether failurehealthyIndexFun takes k or t(k)
         tk = t(k);
-        healthyIndex = failureIndex(tk,failureTime);
-
-        % 3) Get current A and AMS for this failure case
-        ACurr   = uCashe(healthyIndex).A;     % 3x8 or 3x(#healthy)
-        AMSCurr = uCashe(healthyIndex).U;   % whatever findUfromAd expects
-
-        % 4) Allocation: desired wrench -> thruster commands
-        %    Replace this line with your actual findUfromAd signature
-        u_k = findUfromAd_DA(ad_k, AMSCurr,ACurr);
-        % Make sure u_k comes back as 8x1 (pad zeros for failed thrusters if needed)
+    
+        % --- 1) Failure pattern & current A / AMS ---
+        healthyIndex = failureIndex(tk, failureTime);   % 1..256
+    
+        ACurr   = uCashe(healthyIndex).A;    % 3 x 8 (with zeroed failed cols)
+        AMSCurr = uCashe(healthyIndex).U;    % AMS facets for this failure mode
+        mask    = uCashe(healthyIndex).mask; % 1 x 8 logical, healthy thrusters
+    
+        % --- 2) Compute admissible wrench box from AMS / A ---
+        % cfg.u_min / cfg.u_max are the *nominal* thruster limits
+        uBounds = computeBounds(ACurr, cfg.u_min, cfg.u_max, mask);
+    
+        % --- 3) MPC: current state -> desired wrench a_d(k) within bounds ---
+        ad_k = mpcStep(mpc, xk, xRef, uBounds);    % 3x1
+        adHist(:,k) = ad_k;
+    
+        % --- 4) Allocation: desired wrench -> thruster commands (DA) ---
+        u_k = findUfromAd_DA(ad_k, AMSCurr, ACurr);
         uHist(:,k) = u_k;
-
-        % 5) Real wrench applied to plant
+    
+        % --- 5) Real wrench applied to plant ---
         aReal = ACurr * u_k;       % 3x1 [Fx; Fy; tau] realized
-
-        % 6) Plant update using the same discrete model as MPC
+        aRealHist(:,k) = aReal;    % LOG
+    
+        % --- 6) Plant update using same discrete model as MPC ---
         xNext = full(mpc.F_RK4(xk, aReal));
         xHist(:,k+1) = xNext;
     end
+
 end
 function healthyIdx = failureIndex(t, failureTime)
 % HEALTHYINDEXFROMFAILURETIMES

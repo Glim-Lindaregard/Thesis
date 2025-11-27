@@ -12,7 +12,6 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
         
         if k == size(U,3)+1
             fprintf("No such moment possible\n")
-            %ads(:,size(ads,2)+1) = ad;
             uOut = zeros(N,1);
             found = 1;
             index = 0;
@@ -34,16 +33,14 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
         M = [ad,  adi - adj,  adi - adk];
 
         if rcond(M) < tol
-            x =pinv(M)*adi;
-            wasPinv = true;
+            continue;
         else   
             x = M\adi; 
-            wasPinv = false;
         end
         
         a = x(1); b = x(2); c = x(3);
 
-        if a > 0 && b >= 0 && c >= 0 && b <= 1 && c <= 1
+        if a > tol && b >= 0 && c >= 0 && b <= 1 && c <= 1
 
             ui = U(:,1,k);
             uj = U(:,2,k);
@@ -51,9 +48,6 @@ function [uOut,index,x] = findUfromAd_DA(ad ,U,A)
             uStar = ui + b*(uj-ui) + c*(uk-ui);
 
 
-            if wasPinv
-                fprintf("pinv was used to find U\n");
-            end
             if a >= 1
                 uOut = uStar / a;
             else

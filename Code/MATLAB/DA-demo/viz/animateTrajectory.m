@@ -1,88 +1,77 @@
-function animateTrajectory(t, X_cl, U_cl, cfg, opts, failureTime)
-% ANIMATETRAJECTORY_ARRAYS  Animate slider pose + thrusters using arrays.
-%   t    : 1×N time vector (seconds)
-%   X_cl : 6×N state trajectory [x;y;theta;vx;vy;r]
-%   U_cl : 8×(N-1) or 8×N control sequence (thruster commands)
-%   ref  : [x_ref; y_ref; theta_ref] or [] for no ref
-%   cfg  : struct with fields A, pos (8×2), beta (8×1), a (body radius)
-%   opts : options struct (optional, same fields as before)
-%   failureTime : scalar or 1×8 vector (seconds) for per-thruster failure
+function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
 
-    % ---- defaults
-    if nargin < 6 || isempty(failureTime), failureTime = 0; end
-    if nargin < 5 || isempty(opts),        opts        = struct(); end
-    if ~isfield(opts,'tol_u'),        opts.tol_u      = 1e-6;      end
-    if ~isfield(opts,'fps'),          opts.fps        = 60;        end
-    if ~isfield(opts,'saveVideo'),    opts.saveVideo  = false;     end
-    if ~isfield(opts,'videoName'),    opts.videoName  = 'slider_traj.mp4'; end
-    if ~isfield(opts,'simSpeed'),     opts.simSpeed   = 1;         end
-    if ~isfield(opts,'broken_len'),   opts.broken_len = 0.6;       end
+    if nargin < 5 || isempty(failureTime)
+        failureTime = inf(1, cfg.N_thrusters);   % default: never fails
+    end
+
+    tol_u      = 1e-6;
+    fps        = 90;
+    simSpeed   = 20;
+    broken_len = 0.6;
 
     % ---- meta
-    m = size(cfg.A,2);
-    ref = cfg.xRef;
+    ref   = cfg.xRef;
+    t     = t(:)';                  % 1×Nt
+    Nt    = numel(t);               % number of time steps
+    N_thr = cfg.N_thrusters;        % number of thrusters
 
-    % ---- logs (from arrays instead of simout)
-    % t is already a double time vector, 1×N or N×1
-    t = t(:)';     % force row
 
-    % X_cl is 6×N
-    Xraw = X_cl.';
-    x  = Xraw(:,1);
-    y  = Xraw(:,2);
-    th = Xraw(:,3);
+    % X_cl is 6×Nt
+    Xraw = X_cl.';                  % Nt×6
+    x    = Xraw(:,1);
+    y    = Xraw(:,2);
+    th   = Xraw(:,3);
 
-    % U_cl is 8×(N-1) or 8×N; normalize to 8×N
-    U = normalizeU(U_cl);
-    if size(U,2) == numel(t)-1
-        % pad with last control so we have one u per frame
+    % U_cl is N_thr×(Nt-1) or N_thr×Nt (or Nt×N_thr); normalize to N_thr×Nt
+    U = normalizeU(U_cl, N_thr);
+    if size(U,2) == Nt-1
         U = [U, U(:,end)];
-    elseif size(U,2) ~= numel(t)
-        error('U_cl must have N or N-1 columns to match t.');
+    elseif size(U,2) ~= Nt
+        error('U_cl must have Nt or Nt-1 columns to match t.');
     end
 
     % ---- geometry / scales
-    if isfield(cfg,'a'), body_r = cfg.a; else, body_r = 0.2; end
-    pos  = cfg.pos;                           % 8×2 (body-frame positions)
-    beta = cfg.beta(:);                       % 8×1 (body-frame nozzle angles)
-    assert(isequal(size(pos),[8,2]));
-    assert(numel(beta)==8);
+    body_r = cfg.a;
+    pos    = cfg.pos;        % N_thr×2
+    beta   = cfg.beta(:);    % N_thr×1 (body-frame directions)
 
-    umax_guess = max(max(abs(U),[],'all'), 1e-3);
-    if ~isfield(opts,'arrow_scale'), opts.arrow_scale = 0.75*body_r/umax_guess; end
+    umax_guess  = max(max(abs(U),[],'all'), 1e-3);
+    arrow_scale = 0.75*body_r/umax_guess;
 
     % ---- figure
     fig = figure('Color',[0.18 0.18 0.18]); hold on; axis equal;
     set(fig,'Name','Slider Animation');
 
-    plot(x, y, ':', 'LineWidth', 0.6, 'Color', 0.6*[1 1 1]);     % faint full path
+    plot(x, y, ':', 'LineWidth', 0.6, 'Color', 0.6*[1 1 1]);
     trace = plot(NaN,NaN,'-','LineWidth',1.4,'Color',[0.9 0.9 0.95]);
 
-    [xmin,xmax] = bounds(x); [ymin,ymax] = bounds(y);
-    if ~isempty(ref)
-        xmin = min(xmin, ref(1)); xmax = max(xmax, ref(1));
-        ymin = min(ymin, ref(2)); ymax = max(ymax, ref(2));
-    end
-    pad  = 3*body_r + 0.1*max(1, max(xmax-xmin, ymax-ymin));
+    [xmin,xmax] = bounds(x);
+    [ymin,ymax] = bounds(y);
+
+    xmin = min(xmin, ref(1));
+    xmax = max(xmax, ref(1));
+    ymin = min(ymin, ref(2));
+    ymax = max(ymax, ref(2));
+
+    pad = 3*body_r + 0.1*max(1, max(xmax-xmin, ymax-ymin));
     axis([xmin-pad xmax+pad ymin-pad ymax+pad]);
 
-    % reference orientation arrow (optional)
-    if ~isempty(ref)
-        quiver(ref(1),ref(2),cos(ref(3)),sin(ref(3)), ...
-               'AutoScale','off','Color',[0.9 0.3 0.3], ...
-               'LineWidth',1.5,'MaxHeadSize',0.8,'HandleVisibility','off');
-    end
+    % reference orientation arrow
+    quiver(ref(1),ref(2),cos(ref(3)),sin(ref(3)), ...
+           'AutoScale','off','Color',[0.9 0.3 0.3], ...
+           'LineWidth',1.5,'MaxHeadSize',0.5,'HandleVisibility','off');
 
     % graphics objects
-    [hBody, hPts, hQuiv] = createGraphics(body_r);   % green thruster arrows
-    headLen  = 1.0*body_r;
+    [hBody, hPts, hQuiv] = createGraphics(body_r, N_thr);   % green thruster arrows
+
+    headLen = 1.0*body_r;
     % body axes: x_b^+ (red) and y_b^+ (blue)
     hX = quiver(NaN,NaN,NaN,NaN,0,'LineWidth',1.5,'MaxHeadSize',2.5,'Color','r'); % x_b^+
     hY = quiver(NaN,NaN,NaN,NaN,0,'LineWidth',1.5,'MaxHeadSize',2.5,'Color','b'); % y_b^+
 
     % --- multi-failure red markers (one per thruster, initially hidden)
-    hBroken = gobjects(m,1);
-    for i = 1:m
+    hBroken = gobjects(N_thr,1);
+    for i = 1:N_thr
         hBroken(i) = quiver(NaN,NaN,NaN,NaN,0, ...
             'LineWidth',1.8,'MaxHeadSize',2.5,'Color',[0.9 0.2 0.2], ...
             'HandleVisibility','off','Visible','off');
@@ -94,19 +83,21 @@ function animateTrajectory(t, X_cl, U_cl, cfg, opts, failureTime)
     legend([trace, hQuiv(1)], {'trajectory','active thruster'}, ...
            'TextColor',[0.95 0.95 0.95], 'Location','best');
 
-    % ---- per-thruster failure times
-    ft = prepareFailureTimes_onlyTimes(failureTime, m);
+    % ---- per-thruster failure times (same ordering as cfg.pos / rows of U)
+    ft = prepareFailureTimes_onlyTimes(failureTime, N_thr);
 
     % ---- animation loop
-    N = numel(t);
-    dt_target = 1/max(1,opts.fps);
+    dt_target = 1/max(1,fps);
 
-    for k = 1:N
+    pause(2.5);
+    for k = 1:Nt
 
         set(trace,'XData',x(1:k),'YData',y(1:k));
 
-        xc=x(k); yc=y(k); thk=th(k);
-        R = [cos(thk) -sin(thk); sin(thk) cos(thk)];
+        xc  = x(k);
+        yc  = y(k);
+        thk = th(k);
+        R   = [cos(thk) -sin(thk); sin(thk) cos(thk)];
 
         % body axes
         set(hX,'XData',xc,'YData',yc, ...
@@ -115,37 +106,46 @@ function animateTrajectory(t, X_cl, U_cl, cfg, opts, failureTime)
                'UData',-headLen*sin(thk), 'VData', headLen*cos(thk));      % y_b^+
 
         % world positions of thrusters
-        thr_w = (R*pos.').'+[xc yc];
+        thr_w = (R*pos.').'+[xc yc];   % N_thr×2
 
         % body patch + points
         updateCircle(hBody, [xc yc], body_r);
         set(hPts,'XData',thr_w(:,1),'YData',thr_w(:,2));
 
         % green thrust arrows (hide once that thruster has failed)
-        uf      = U(:,k);
-        active  = abs(uf) > opts.tol_u;
-        dir_l   = [cos(beta) sin(beta)];       % body-frame dirs
-        dir_w   = (R*dir_l.').';               % world-frame dirs
-        L       = opts.arrow_scale * uf;       % signed lengths
-        Ux      = dir_w(:,1).*L;  Uy = dir_w(:,2).*L;
+        uf     = U(:,k);                   % N_thr×1 (same ordering as cfg)
+        active = abs(uf) > tol_u;
+
+        dir_l = [cos(beta) sin(beta)];     % N_thr×2, body-frame dirs
+        dir_w = (R*dir_l.').';             % N_thr×2, world-frame dirs
+
+        L   = arrow_scale * uf;            % signed lengths
+        Ux  = dir_w(:,1).*L;
+        Uy  = dir_w(:,2).*L;
 
         tk = t(k);
 
-        for i = 1:m
+        for i = 1:N_thr
             isFailedNow = (tk >= ft(i));
-            set(hQuiv(i), 'XData',thr_w(i,1), 'YData',thr_w(i,2), ...
-                          'UData',Ux(i),      'VData',Uy(i), ...
-                          'Visible', tern(active(i) && ~isFailedNow, 'on','off'));
+            set(hQuiv(i), ...
+                'XData', thr_w(i,1), ...
+                'YData', thr_w(i,2), ...
+                'UData', Ux(i), ...
+                'VData', Uy(i), ...
+                'Visible', tern(active(i) && ~isFailedNow, 'on','off'));
         end
 
         % red broken markers
-        Lb = opts.broken_len * body_r;
-        for i = 1:m
+        Lb = broken_len * body_r;
+        for i = 1:N_thr
             if tk >= ft(i)
                 bdir = dir_w(i,:);
-                set(hBroken(i), 'XData',thr_w(i,1), 'YData',thr_w(i,2), ...
-                                'UData',Lb*bdir(1), 'VData',Lb*bdir(2), ...
-                                'Visible','on');
+                set(hBroken(i), ...
+                    'XData', thr_w(i,1), ...
+                    'YData', thr_w(i,2), ...
+                    'UData', Lb*bdir(1), ...
+                    'VData', Lb*bdir(2), ...
+                    'Visible','on');
             else
                 set(hBroken(i),'Visible','off');
             end
@@ -153,37 +153,42 @@ function animateTrajectory(t, X_cl, U_cl, cfg, opts, failureTime)
 
         drawnow limitrate;
 
-        if k < N
-            dt = t(min(k+1,N)) - t(k);
-            pause(opts.simSpeed*max(0, min(dt_target, dt)));
+        if k < Nt
+            dt = t(k+1) - t(k);
+            pause(simSpeed * max(0, min(dt_target, dt)));
         end
     end
 end
 
-
 % ----------------------- helpers (same file) -----------------------------
-function U = normalizeU(D)
-% Normalize arbitrary Simulink logging shapes to 8×N numeric.
+function U = normalizeU(D, N_thr)
     D = squeeze(D);
-    if      ismatrix(D) && size(D,2)==8        % N×8
-        U = D.';                                % -> 8×N
-    elseif  ismatrix(D) && size(D,1)==8        % 8×N
+
+    % We *expect* N_thr×Nt
+    if ~ismatrix(D)
+        error('U_cl must be a 2-D array, got size %s.', mat2str(size(D)));
+    end
+
+    if size(D,1) == N_thr
+        % Already N_thr×Nt
         U = D;
-    elseif  ndims(D)==3 && size(D,3)==8        % N×1×8, etc.
-        U = permute(D,[3 1 2]);                % 8×N×1/?
-        U = reshape(U, 8, []);                 % 8×N
+    elseif size(D,2) == N_thr
+        % Time × N_thr, transpose once
+        U = D.';   % N_thr×Nt
     else
-        error('Logged ''u'' must be 8-wide. Got size %s after squeeze.', mat2str(size(D)));
+        error('U_cl must have %d thruster channels, got size %s.', ...
+              N_thr, mat2str(size(D)));
     end
 end
 
-function [hBody, hPts, hQuiv] = createGraphics(r)
+
+function [hBody, hPts, hQuiv] = createGraphics(r, N_thr)
     th    = linspace(0,2*pi,100);
     hBody = patch(r*cos(th), r*sin(th), 0.92*[1 1 1], ...
                   'EdgeColor', 0.3*[1 1 1], 'LineWidth', 1.0);
     hPts  = plot(NaN,NaN,'k.','MarkerSize',12);
-    hQuiv = gobjects(8,1);
-    for i = 1:8
+    hQuiv = gobjects(N_thr,1);
+    for i = 1:N_thr
         hQuiv(i) = quiver(NaN,NaN,NaN,NaN,0, ...
                           'LineWidth',1.6, 'MaxHeadSize',2.5, ...
                           'Color',[0.2 0.8 0.2], 'Visible','off');
@@ -192,27 +197,28 @@ end
 
 function updateCircle(h, c, r)
     th = linspace(0,2*pi,100);
-    set(h,'XData', c(1) + r*cos(th), 'YData', c(2) + r*sin(th));
+    set(h, 'XData', c(1) + r*cos(th), ...
+           'YData', c(2) + r*sin(th));
 end
 
 function s = tern(tf, a, b)
-    if tf, s=a; else, s=b; end
+    if tf, s = a; else, s = b; end
 end
 
-function ft = prepareFailureTimes_onlyTimes(failureTime, m)
-% failureTime: scalar or 1×m (seconds). Inf => never fails. Negative => fail at t=0.
+function ft = prepareFailureTimes_onlyTimes(failureTime, N_thr)
+    % failureTime: scalar or 1×N_thr (seconds). Inf => never fails. <0 => fail at t=0.
     if nargin < 1 || isempty(failureTime)
-        ft = inf(1,m);
+        ft = inf(1, N_thr);
         return;
     end
     if isscalar(failureTime)
-        ft = repmat(double(failureTime), 1, m);
+        ft = repmat(double(failureTime), 1, N_thr);
     else
-        if numel(failureTime) ~= m
-            error('failureTime must be scalar or length-%d vector.', m);
+        if numel(failureTime) ~= N_thr
+            error('failureTime must be scalar or length-%d vector.', N_thr);
         end
         ft = double(failureTime(:)).';
     end
     ft(~isfinite(ft)) = inf;   % NaN -> never
-    ft(ft < 0) = 0;            % negative -> fail at t=0
+    ft(ft < 0)        = 0;     % negative -> fail at t=0
 end

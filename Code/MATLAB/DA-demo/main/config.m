@@ -3,10 +3,9 @@ cfg = struct();
 
 % Simulation parameters 
 cfg.Ts       = 0.2;
-cfg.simTime = 30;
-cfg.x0       = [0;0;0;0;0;0];
-cfg.xRef    = [-0.5;3;3*pi/2;0;0;0];
-
+cfg.simTime = 20;
+cfg.x0   = [0; 0; pi/2; 0; 0; 0];
+cfg.xRef = [2; 0; pi/2; 0; 0; 0];
 
 %MPC parameters
 cfg.FxMax   = 0.8*(2*0.7);        % tune
@@ -15,7 +14,7 @@ cfg.TauMax  = 0.8*(4*0.14);
 
 cfg.N = 15;
 
-cfg.Q = diag([10 10 5  10 10 5]);   % << try this
+cfg.Q = diag([2 2 2  10 10 10]);   % << try this
 
 cfg.R = diag(1*[2 2 0.8]);          % big damping increase
 

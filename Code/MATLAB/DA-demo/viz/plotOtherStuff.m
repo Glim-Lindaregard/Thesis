@@ -1,47 +1,52 @@
-function plotOtherStuff(simout)
-    % -- Plotts comanded a from the PID VS Allocaded a ---
+function plotOtherStuff(t, adHist, aRealHist)
+% PLOTOTHERSTUFF  Compare commanded wrench vs allocated wrench
+%
+% Inputs:
+%   t         : 1xNt time vector (same as simulateSlider output)
+%   adHist    : 3x(Nt-1) commanded wrench from MPC
+%   aRealHist : 3x(Nt-1) realized wrench after allocation
 
+    % Time stamps for a_d and a_real (they live on k=1..Nt-1)
+    t_cmd = t(1:end-1);
 
-    logs = simout.logsout;
+    % Split components
+    aPDdataX   = adHist(1,:);   % commanded Fx
+    aPDdataY   = adHist(2,:);   % commanded Fy
+    aPDdataTh  = adHist(3,:);   % commanded tau
 
-    aPD = logs.get('ad').Values;
-    t_PD_T  = aPD.Time;
-    aPDdata = aPD.Data;
-
-
-    aAllo = logs.get('a').Values;
-    t_allo_T = aAllo.Time;
-    aAllodata= aAllo.Data;
-
-    
-    aPDdataX = aPDdata(1,:); aPDdataY = aPDdata(2,:); aPDdataTh = aPDdata(3,:);
-    aAlloX = aAllodata(1,:); aAlloY = aAllodata(2,:); aAlloTh = aAllodata(3,:);
-
-
-    t_PD = seconds(t_PD_T - t_PD_T(1));
-    t_allo = seconds(t_allo_T- t_allo_T(1));
-
+    aAlloX     = aRealHist(1,:);  % realized Fx
+    aAlloY     = aRealHist(2,:);  % realized Fy
+    aAlloTh    = aRealHist(3,:);  % realized tau
 
     % --- 3×1 grid of plots ---
-    figure('Name','Moment tracking','Color',[0.2 0.2 0.2]);
+    figure('Name','Wrench tracking','Color',[0.2 0.2 0.2]);
     tiledlayout(3,1,'TileSpacing','compact','Padding','compact');
 
-    % aPDx vs aAlloX
+    % Fx
     nexttile;
-    plot(t_PD, aPDdataX, '-', 'LineWidth', 1.4, 'DisplayName','aPDx'); hold on;
-    plot(t_allo, aAlloX, '--', 'LineWidth', 1.4, 'DisplayName','aAlloX'); hold on;
-    grid on; ylabel('Force [N]'); legend('aPDx','aAlloX'); title('aPDx VS aAlloX');
+    plot(t_cmd, aPDdataX, '-',  'LineWidth', 1.4); hold on;
+    plot(t_cmd, aAlloX,  '--', 'LineWidth', 1.4);
+    grid on;
+    ylabel('Force [N]');
+    legend('a_d,x','a_{real,x}','Location','best');
+    title('Commanded vs realized F_x','Interpreter','tex');
 
-    % aPDy vs aAlloY
+    % Fy
     nexttile;
-    plot(t_PD, aPDdataY, '-', 'LineWidth', 1.4, 'DisplayName','aPDy'); hold on;
-    plot(t_allo, aAlloY, '--', 'LineWidth', 1.4, 'DisplayName','aAlloY'); hold on;
-    grid on; ylabel('Force [N]'); legend('aPDy','aAlloY'); title('aPDy VS aAlloY');
+    plot(t_cmd, aPDdataY, '-',  'LineWidth', 1.4); hold on;
+    plot(t_cmd, aAlloY,  '--', 'LineWidth', 1.4);
+    grid on;
+    ylabel('Force [N]');
+    legend('a_d,y','a_{real,y}','Location','best');
+    title('Commanded vs realized F_y','Interpreter','tex');
 
-    % aPDth vs aAlloTH
+    % Tau
     nexttile;
-    plot(t_PD, aPDdataTh, '-', 'LineWidth', 1.4, 'DisplayName','aPDth'); hold on;
-    plot(t_allo, aAlloTh, '--', 'LineWidth', 1.4, 'DisplayName','aAlloTh'); hold on;
-    grid on; ylabel('Moment [Nm]'); legend('aPDth','aAlloTh'); title('aPDth VS aAlloTh');
-
+    plot(t_cmd, aPDdataTh, '-',  'LineWidth', 1.4); hold on;
+    plot(t_cmd, aAlloTh,   '--', 'LineWidth', 1.4);
+    grid on;
+    ylabel('Moment [Nm]');
+    xlabel('Time [s]');
+    legend('a_d,\theta','a_{real,\theta}','Location','best');
+    title('Commanded vs realized \tau','Interpreter','tex');
 end
