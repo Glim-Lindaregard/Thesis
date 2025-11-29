@@ -38,8 +38,9 @@ function mpc = mpc_init(Ts, N, Q, R, phys)
     Tau = ad(3);
 
     % world-frame accel
-    fxx = Fx*cos(theta) + Fy*sin(theta);
-    fyy = -Fx*sin(theta) + Fy*cos(theta);
+    fxx = Fx*cos(theta) - Fy*sin(theta);
+    fyy = Fx*sin(theta) + Fy*cos(theta);
+
 
     dwdt = [vx;
             vy;
@@ -111,17 +112,30 @@ function mpc = mpc_init(Ts, N, Q, R, phys)
     lbx = [];
     ubx = [];
 
-    % state bounds (unconstrained)
+    xMin = phys.xMin;
+    yMin = phys.yMin;
+    xMax = phys.xMax;
+    yMax = phys.yMax;
+
+
+    %state bounds (unconstrained)
+
     for i = 1:(N+1)
         lbx = [lbx; -inf*ones(nStates,1)];
         ubx = [ubx;  inf*ones(nStates,1)];
+        idx = stateIndex(i);
+        lbx(idx.x) = xMin;
+        ubx(idx.x) = xMax;
+        lbx(idx.y) = yMin;
+        ubx(idx.y) = yMax;
     end
 
+    
     % control bounds (rough symmetric box for Fx,Fy,Tau)
     FxMax  = phys.FxMax;
     FyMax  = phys.FyMax;
     TauMax = phys.TauMax;
-
+    
     for i = 1:N
         lbx = [lbx; -[FxMax; FyMax; TauMax]];
         ubx = [ubx;  [FxMax; FyMax; TauMax]];
@@ -153,4 +167,13 @@ function X_next = RK4_step(f, Xk, Uk, Ts)
     k3 = f(Xk + Ts/2*k2, Uk);
     k4 = f(Xk + Ts   *k3, Uk);
     X_next = Xk + Ts/6*(k1 + 2*k2 + 2*k3 + k4);
+end
+function idx = stateIndex(i)
+    nrStates = 6; base = (i-1)*nrStates;
+    idx.x     = base +1;
+    idx.y     = base +2;
+    idx.theta = base + 3;
+    idx.vx    = base + 4;
+    idx.vy    = base + 5;
+    idx.tau   = base + 6;
 end

@@ -50,7 +50,7 @@ function [amin, amax] = oneRowBounds(a, u_min, u_max)
         aj = a(j);
         if aj > 0
             amax = amax + aj * u_max(j);
-            amin = amin + aj * u_min(j);
+            amin = amin + aj * u_min(j);   %always zero
         elseif aj < 0
             amax = amax + aj * u_min(j);
             amin = amin + aj * u_max(j);

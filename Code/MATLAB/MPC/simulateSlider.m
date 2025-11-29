@@ -29,6 +29,10 @@ function [xHist, adHist, uHist,aRealHist, t] = simulateSlider(cfg,uCashe, failur
     phys.FxMax = cfg.FxMax;   % rough global bounds
     phys.FyMax = cfg.FyMax;
     phys.TauMax = cfg.TauMax;
+    phys.xMin = cfg.xMin;
+    phys.xMax = cfg.xMax;
+    phys.yMin = cfg.yMin;
+    phys.yMax = cfg.yMax;
 
     % --- weights ---
     Q = cfg.Q;   % 6x6

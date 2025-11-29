@@ -1,5 +1,5 @@
 clc; clear; close all;
-
+addpath('~/workspace/MATLAB_Packages');
 
 %Set when which thruster fails
 failureTime = [inf inf inf inf inf inf inf inf];    %[1,2,3,4,5,6,7,8]
@@ -9,15 +9,16 @@ cfg0 = config();
 uCache = buildAllAMS(cfg0);  
 
 % --- run simulation ---
+
+
 [xHist, adHist, uHist,aRealHist, t] = simulateSlider(cfg0,uCache,failureTime);
-
-
 %Visualizion
 if 1
 
     animateTrajectory(t,xHist,uHist,cfg0,failureTime);
     
     plotStates(t,xHist,cfg0.xRef);
+    %plotCopare(t,xHist,xHistC,cfg0.xRef);
     
     %plotOtherStuff(t,adHist,aRealHist);
 

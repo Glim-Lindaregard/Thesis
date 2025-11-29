@@ -4,10 +4,11 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
         failureTime = inf(1, cfg.N_thrusters);   % default: never fails
     end
 
-    tol_u      = 1e-6;
-    fps        = 90;
-    simSpeed   = 20;
-    broken_len = 0.6;
+    tol_u          = 1e-6;
+    simSpeed       = 1;      % 1 = real time, >1 faster, <1 slower
+    broken_len     = 0.6;
+    refArrowLength = 0.5;
+    ANIM_SUB       = 4;      % animation upsampling per sim step
 
     % ---- meta
     ref   = cfg.xRef;
@@ -15,6 +16,11 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
     Nt    = numel(t);               % number of time steps
     N_thr = cfg.N_thrusters;        % number of thrusters
 
+    % ---- table bounds from cfg (with wall buffer) ----
+    xMin = cfg.xMin - cfg.wallBuffer;
+    xMax = cfg.xMax + cfg.wallBuffer;
+    yMin = cfg.yMin - cfg.wallBuffer;
+    yMax = cfg.yMax + cfg.wallBuffer;
 
     % X_cl is 6×Nt
     Xraw = X_cl.';                  % Nt×6
@@ -36,30 +42,73 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
     beta   = cfg.beta(:);    % N_thr×1 (body-frame directions)
 
     umax_guess  = max(max(abs(U),[],'all'), 1e-3);
-    arrow_scale = 0.75*body_r/umax_guess;
+    arrow_scale = 1.5*body_r/umax_guess;
+
+    % ---- build smoother animation grid (upsampling) ----
+    if Nt > 1
+        dt_sim = mean(diff(t));
+    else
+        dt_sim = cfg.Ts;   % fallback if single sample
+    end
+    dt_anim  = dt_sim / ANIM_SUB;
+    t_anim   = t(1):dt_anim:t(end);
+    Nt_anim  = numel(t_anim);
+
+    % interpolate x, y, th for animation
+    x_anim  = interp1(t, x,  t_anim, 'pchip');
+    y_anim  = interp1(t, y,  t_anim, 'pchip');
+    th_anim = interp1(t, th, t_anim, 'pchip');
+
+    % zero-order hold for U over animation grid
+    U_anim = zeros(N_thr, Nt_anim);
+    for i_thr = 1:N_thr
+        U_anim(i_thr,:) = interp1(t, U(i_thr,:), t_anim, 'previous', 'extrap');
+    end
 
     % ---- figure
-    fig = figure('Color',[0.18 0.18 0.18]); hold on; axis equal;
-    set(fig,'Name','Slider Animation');
+    fig = figure('Color',0.1*[1 1 1]); hold on; axis equal;
+    set(fig,'Name','Real Time Slider Animation');
+    title('Real Time Slider Animation');
+    xlabel('Table X');
+    ylabel('Table Y');
 
+    % table rectangle (static)
+    tableX = [xMin xMax xMax xMin xMin];
+    tableY = [yMin yMin yMax yMax yMin];
+    plot(tableX, tableY, '-', 'Color', 0.7*[0.7 1 1], 'LineWidth', 5);
+
+    % trajectory preview (original samples)
     plot(x, y, ':', 'LineWidth', 0.6, 'Color', 0.6*[1 1 1]);
     trace = plot(NaN,NaN,'-','LineWidth',1.4,'Color',[0.9 0.9 0.95]);
 
-    [xmin,xmax] = bounds(x);
-    [ymin,ymax] = bounds(y);
+    % axis limits: include trajectory, ref, AND full table
+    [xmin_traj,xmax_traj] = bounds(x);
+    [ymin_traj,ymax_traj] = bounds(y);
 
-    xmin = min(xmin, ref(1));
-    xmax = max(xmax, ref(1));
-    ymin = min(ymin, ref(2));
-    ymax = max(ymax, ref(2));
+    xmin = min([xmin_traj, ref(1), xMin]);
+    xmax = max([xmax_traj, ref(1), xMax]);
+    ymin = min([ymin_traj, ref(2), yMin]);
+    ymax = max([ymax_traj, ref(2), yMax]);
 
-    pad = 3*body_r + 0.1*max(1, max(xmax-xmin, ymax-ymin));
+    pad = 1; % margin around
     axis([xmin-pad xmax+pad ymin-pad ymax+pad]);
 
+    % ---- timer text (top-left, just above square border) ----
+    dx = 0.02*(xMax - xMin + eps);
+    dy = 0.03*(yMax - yMin + eps);
+    timerX = xMin + dx;       % slightly in from left border
+    timerY = yMax + dy;       % just above top border
+
+    hTimer = text(timerX, timerY, 't = 0.00 s', ...
+                  'Color',[1 1 1], ...
+                  'FontSize',12, ...
+                  'HorizontalAlignment','left', ...
+                  'VerticalAlignment','bottom');
+
     % reference orientation arrow
-    quiver(ref(1),ref(2),cos(ref(3)),sin(ref(3)), ...
-           'AutoScale','off','Color',[0.9 0.3 0.3], ...
-           'LineWidth',1.5,'MaxHeadSize',0.5,'HandleVisibility','off');
+    quiver(ref(1),ref(2),refArrowLength*cos(ref(3)),refArrowLength*sin(ref(3)), ...
+           'AutoScale','off','Color',[1 0.3 0.3], ...
+           'LineWidth',2,'MaxHeadSize',0.8,'HandleVisibility','off');
 
     % graphics objects
     [hBody, hPts, hQuiv] = createGraphics(body_r, N_thr);   % green thruster arrows
@@ -86,17 +135,25 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
     % ---- per-thruster failure times (same ordering as cfg.pos / rows of U)
     ft = prepareFailureTimes_onlyTimes(failureTime, N_thr);
 
+    realStart = tic;       % wall-clock reference
+    t0        = t_anim(1); % simulation start time
+
+    makeVideo = true;                     % set false to disable
+    videoFile = 'sliderAnimation.avi';
+    if makeVideo
+        v = VideoWriter(videoFile, 'Motion JPEG AVI');
+        v.FrameRate = 30;                 % playback FPS (independent of real-time sim)
+        open(v);
+    end
+
     % ---- animation loop
-    dt_target = 1/max(1,fps);
+    for k = 1:Nt_anim
 
-    pause(2.5);
-    for k = 1:Nt
-
-        set(trace,'XData',x(1:k),'YData',y(1:k));
-
-        xc  = x(k);
-        yc  = y(k);
-        thk = th(k);
+        % use interpolated trajectory for drawing
+        set(trace,'XData',x_anim(1:k),'YData',y_anim(1:k));
+        xc  = x_anim(k);
+        yc  = y_anim(k);
+        thk = th_anim(k);
         R   = [cos(thk) -sin(thk); sin(thk) cos(thk)];
 
         % body axes
@@ -113,7 +170,7 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
         set(hPts,'XData',thr_w(:,1),'YData',thr_w(:,2));
 
         % green thrust arrows (hide once that thruster has failed)
-        uf     = U(:,k);                   % N_thr×1 (same ordering as cfg)
+        uf     = U_anim(:,k);                   % N_thr×1 (same ordering as cfg)
         active = abs(uf) > tol_u;
 
         dir_l = [cos(beta) sin(beta)];     % N_thr×2, body-frame dirs
@@ -123,7 +180,11 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
         Ux  = dir_w(:,1).*L;
         Uy  = dir_w(:,2).*L;
 
-        tk = t(k);
+        tk = t_anim(k);
+
+        % update timer text (simulation elapsed time)
+        sim_t = t_anim(k) - t_anim(1);
+        set(hTimer, 'String', sprintf('t = %.2f s', sim_t));
 
         for i = 1:N_thr
             isFailedNow = (tk >= ft(i));
@@ -151,13 +212,36 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
             end
         end
 
-        drawnow limitrate;
+        drawnow;
 
-        if k < Nt
-            dt = t(k+1) - t(k);
-            pause(simSpeed * max(0, min(dt_target, dt)));
+        if makeVideo
+            frame = getframe(fig);
+            writeVideo(v, frame);
+        end
+
+        % desired wall-clock time since start (scaled by simSpeed)
+        simElapsed   = (t_anim(k) - t0) / simSpeed;
+        wallElapsed  = toc(realStart);
+        remaining    = simElapsed - wallElapsed;
+
+        if k == 1
+            % optional initial pause *in addition* to real-time sync
+            pause(2.5);
+            % reset reference so main run is still real-time
+            realStart = tic;
+        else
+            if remaining > 0
+                pause(remaining);
+            end
         end
     end
+
+    if makeVideo
+        close(v);
+        fprintf('Video saved: %s (and MP4)\n', videoFile);
+    end
+
+
 end
 
 % ----------------------- helpers (same file) -----------------------------
