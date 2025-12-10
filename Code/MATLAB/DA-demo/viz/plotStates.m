@@ -1,15 +1,30 @@
-function plotStates_arrays(t, X, ref)
+function plotStates(t, X, ref)
 % PLOTSTATES_ARRAYS  Plot state tracking using array-based logs.
 %   t   : 1xN or Nx1 time vector [s]
 %   X   : 6xN state trajectory [x; y; theta; vx; vy; w]
-%   ref : 6x1 reference state [x_ref; y_ref; theta_ref; vx_ref; vy_ref; w_ref]
+%   ref : one of
+%           - 6x1 constant reference
+%           - 6xN time-varying reference
+%           - function handle: ref(tk) -> 6x1 at time tk
 
     % Ensure t is a column and starts at 0
     t = t(:);
     t = t - t(1);
+    N = numel(t);
 
     % X is 6xN; transpose to N×6 for column-wise access
-    X = X.';
+    if size(X,1) ~= 6 && size(X,2) == 6
+        X = X.';   % allow Nx6 input
+    elseif size(X,1) == 6
+        X = X.';   % 6xN -> Nx6
+    else
+        error('X must be 6xN or Nx6.');
+    end
+
+    if size(X,1) ~= N
+        error('Time vector length and state trajectory length must match.');
+    end
+
     x  = X(:,1);
     y  = X(:,2);
     th = X(:,3);
@@ -21,13 +36,46 @@ function plotStates_arrays(t, X, ref)
     xdot = vx;
     ydot = vy;
 
-    % Constant reference values (broadcast ref over time)
-    xref    = ref(1) * ones(size(x));
-    yref    = ref(2) * ones(size(y));
-    thref   = ref(3) * ones(size(th));
-    xdotref = ref(4) * ones(size(xdot));
-    ydotref = ref(5) * ones(size(ydot));
-    wref    = ref(6) * ones(size(w));
+    % ---- build reference trajectories in array form: N×6 ----
+    if isa(ref, 'function_handle')
+        % time-varying via function handle
+        Ref = zeros(N,6);
+        for k = 1:N
+            rk = ref(t(k));          % expect 6x1
+            rk = rk(:);
+            if numel(rk) ~= 6
+                error('ref(t) must return a 6x1 vector.');
+            end
+            Ref(k,:) = rk.';
+        end
+
+    elseif isvector(ref) && numel(ref) == 6
+        % constant reference (old behaviour)
+        r = ref(:).';
+        Ref = repmat(r, N, 1);       % N×6
+
+    else
+        % array reference: expect 6xN or Nx6
+        if size(ref,1) == 6
+            Ref = ref.';             % 6xN -> N×6
+        elseif size(ref,2) == 6
+            Ref = ref;               % Nx6 already
+        else
+            error('ref must be 6x1, 6xN, Nx6, or a function handle.');
+        end
+
+        if size(Ref,1) ~= N
+            error('ref length must match time vector length.');
+        end
+    end
+
+    % Split reference into components
+    xref    = Ref(:,1);
+    yref    = Ref(:,2);
+    thref   = Ref(:,3);
+    xdotref = Ref(:,4);
+    ydotref = Ref(:,5);
+    wref    = Ref(:,6);
 
     % --- figure & layout ---
     fig = figure('Name','State tracking','Color',[0.2 0.2 0.2]);

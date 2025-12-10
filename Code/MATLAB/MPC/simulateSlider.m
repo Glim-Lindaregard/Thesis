@@ -65,6 +65,10 @@ function [xHist, adHist, uHist,aRealHist, t] = simulateSlider(cfg,uCashe, failur
         % --- 2) Compute admissible wrench box from AMS / A ---
         % cfg.u_min / cfg.u_max are the *nominal* thruster limits
         uBounds = computeBounds(ACurr, cfg.u_min, cfg.u_max, mask);
+
+        %xRef = cfg.refFun(tk);
+
+        xRef = cfg.xRef;
     
         % --- 3) MPC: current state -> desired wrench a_d(k) within bounds ---
         ad_k = mpcStep(mpc, xk, xRef, uBounds);    % 3x1

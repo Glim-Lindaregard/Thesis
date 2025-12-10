@@ -1,0 +1,7 @@
+[console_scripts]
+parameters = tsl_optimizer.parameters:main
+pid_controller = slider_thruster_controller.pid_controller:main
+pid_parameters = slider_thruster_controller.pid_parameters:main
+pwm_publisher = slider_thruster_controller.pwm_publisher:main
+solver = tsl_optimizer.solver:main
+

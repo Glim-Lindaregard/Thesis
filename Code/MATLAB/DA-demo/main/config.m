@@ -13,9 +13,9 @@ cfg.TauMax  = 1.5*(4*0.14);
 
 cfg.N = 15;
 
-cfg.Q = diag([2 2 2  10 10 10]);   % << try this
+cfg.Q = diag([10 10 10  2 2 2]);   % << try this
 
-cfg.R = diag(1*[2 2 0.8]);          % big damping increase
+cfg.R = diag(0.1*[2 2 0.8]);          % big damping increase
 
 
 %Physical
@@ -36,8 +36,25 @@ cfg.u_min = zeros(8,1);         %Min thruster outputs [N]
 
 
 %%%%%%%%%%% INITIAL CONDITIONS %%%%%%%%%%%%%
-cfg.x0   = [wallBuffer; wallBuffer; pi/2;0;0;0];
-cfg.xRef = [4.5; 4.5; 0; 0; 0; 0]; 
+cfg.x0   = [1; 1;0 ;0;0;0];
+cfg.xRef = [2; 2; pi; 0; 0; 0]; 
+
+r     = 1.0;
+omega = 0.2;  % rad/s
+
+% cfg.refFun = @(t) [ ...
+%     1.5 + r*cos(omega*t);         % x(t)
+%     1.5 + r*sin(omega*t);         % y(t)
+%     atan2(sin(omega*t),cos(omega*t));  % theta ~ pointing along the path
+%     0;
+%     0;
+%     0];
+
+% cfg.refFun = @(t) [1;1;0;
+%     0;
+%     0;
+%     0];
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 cfg.pos = [ +a,+b;

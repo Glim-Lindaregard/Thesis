@@ -5,16 +5,22 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
     end
 
     tol_u          = 1e-6;
-    simSpeed       = 1;      % 1 = real time, >1 faster, <1 slower
+    simSpeed       = 2;      % 1 = real time, >1 faster, <1 slower
     broken_len     = 0.6;
     refArrowLength = 0.5;
     ANIM_SUB       = 4;      % animation upsampling per sim step
+    makeVideo = false;                     % set false to disable
 
-    % ---- meta
-    ref   = cfg.xRef;
+    % ---- meta ----
     t     = t(:)';                  % 1×Nt
     Nt    = numel(t);               % number of time steps
     N_thr = cfg.N_thrusters;        % number of thrusters
+
+    % moving reference?
+    hasRefFun = isfield(cfg,'refFun') && isa(cfg.refFun,'function_handle');
+    if ~hasRefFun
+        ref = cfg.xRef;             % fallback: static reference
+    end
 
     % ---- table bounds from cfg (with wall buffer) ----
     xMin = cfg.xMin - cfg.wallBuffer;
@@ -36,7 +42,7 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
         error('U_cl must have Nt or Nt-1 columns to match t.');
     end
 
-    % ---- geometry / scales
+    % ---- geometry / scales ----
     body_r = cfg.a;
     pos    = cfg.pos;        % N_thr×2
     beta   = cfg.beta(:);    % N_thr×1 (body-frame directions)
@@ -65,7 +71,19 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
         U_anim(i_thr,:) = interp1(t, U(i_thr,:), t_anim, 'previous', 'extrap');
     end
 
-    % ---- figure
+    % ---- precompute moving reference path (if any) ----
+    if hasRefFun
+        ref_xy = zeros(Nt_anim, 2);
+        ref_th = zeros(Nt_anim, 1);
+        for k = 1:Nt_anim
+            r = cfg.refFun(t_anim(k));   % 6×1: [x; y; theta; vx; vy; r]
+            ref_xy(k,1) = r(1);
+            ref_xy(k,2) = r(2);
+            ref_th(k)   = r(3);
+        end
+    end
+
+    % ---- figure ----
     fig = figure('Color',0.1*[1 1 1]); hold on; axis equal;
     set(fig,'Name','Real Time Slider Animation');
     title('Real Time Slider Animation');
@@ -81,14 +99,27 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
     plot(x, y, ':', 'LineWidth', 0.6, 'Color', 0.6*[1 1 1]);
     trace = plot(NaN,NaN,'-','LineWidth',1.4,'Color',[0.9 0.9 0.95]);
 
+    % moving reference path preview (if any)
+    if hasRefFun
+        plot(ref_xy(:,1), ref_xy(:,2), '--', ...
+             'LineWidth', 0.8, 'Color', [1 0.7 0.3]);
+    end
+
     % axis limits: include trajectory, ref, AND full table
     [xmin_traj,xmax_traj] = bounds(x);
     [ymin_traj,ymax_traj] = bounds(y);
 
-    xmin = min([xmin_traj, ref(1), xMin]);
-    xmax = max([xmax_traj, ref(1), xMax]);
-    ymin = min([ymin_traj, ref(2), yMin]);
-    ymax = max([ymax_traj, ref(2), yMax]);
+    if hasRefFun
+        xmin = min([xmin_traj, ref_xy(:,1).', xMin]);
+        xmax = max([xmax_traj, ref_xy(:,1).', xMax]);
+        ymin = min([ymin_traj, ref_xy(:,2).', yMin]);
+        ymax = max([ymax_traj, ref_xy(:,2).', yMax]);
+    else
+        xmin = min([xmin_traj, ref(1), xMin]);
+        xmax = max([xmax_traj, ref(1), xMax]);
+        ymin = min([ymin_traj, ref(2), yMin]);
+        ymax = max([ymax_traj, ref(2), yMax]);
+    end
 
     pad = 1; % margin around
     axis([xmin-pad xmax+pad ymin-pad ymax+pad]);
@@ -105,12 +136,21 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
                   'HorizontalAlignment','left', ...
                   'VerticalAlignment','bottom');
 
-    % reference orientation arrow
-    quiver(ref(1),ref(2),refArrowLength*cos(ref(3)),refArrowLength*sin(ref(3)), ...
-           'AutoScale','off','Color',[1 0.3 0.3], ...
-           'LineWidth',2,'MaxHeadSize',0.8,'HandleVisibility','off');
+    % reference orientation arrow / marker
+    if hasRefFun
+        % moving reference arrow (initialized off-figure)
+        hRef = quiver(NaN, NaN, NaN, NaN, ...
+                      'AutoScale','off','Color',[1 0.7 0.7], ...
+                      'LineWidth',2,'MaxHeadSize',0.8, ...
+                      'HandleVisibility','off');
+    else
+        % static reference arrow (your old behaviour)
+        quiver(ref(1),ref(2),refArrowLength*cos(ref(3)),refArrowLength*sin(ref(3)), ...
+               'AutoScale','off','Color',[1 0.3 0.3], ...
+               'LineWidth',2,'MaxHeadSize',0.8,'HandleVisibility','off');
+    end
 
-    % graphics objects
+    % graphics objects (slider body + thrusters)
     [hBody, hPts, hQuiv] = createGraphics(body_r, N_thr);   % green thruster arrows
 
     headLen = 1.0*body_r;
@@ -138,7 +178,6 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
     realStart = tic;       % wall-clock reference
     t0        = t_anim(1); % simulation start time
 
-    makeVideo = true;                     % set false to disable
     videoFile = 'sliderAnimation.avi';
     if makeVideo
         v = VideoWriter(videoFile, 'Motion JPEG AVI');
@@ -146,7 +185,7 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
         open(v);
     end
 
-    % ---- animation loop
+    % ---- animation loop ----
     for k = 1:Nt_anim
 
         % use interpolated trajectory for drawing
@@ -185,6 +224,18 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
         % update timer text (simulation elapsed time)
         sim_t = t_anim(k) - t_anim(1);
         set(hTimer, 'String', sprintf('t = %.2f s', sim_t));
+
+        % update moving reference arrow, if any
+        if hasRefFun
+            xr = ref_xy(k,1);
+            yr = ref_xy(k,2);
+            thr_ref = ref_th(k);
+            set(hRef, ...
+                'XData', xr, ...
+                'YData', yr, ...
+                'UData', refArrowLength*cos(thr_ref), ...
+                'VData', refArrowLength*sin(thr_ref));
+        end
 
         for i = 1:N_thr
             isFailedNow = (tk >= ft(i));
@@ -238,9 +289,8 @@ function animateTrajectory(t, X_cl, U_cl, cfg, failureTime)
 
     if makeVideo
         close(v);
-        fprintf('Video saved: %s (and MP4)\n', videoFile);
+        fprintf('Video saved: %s\n', videoFile);
     end
-
 
 end
 
