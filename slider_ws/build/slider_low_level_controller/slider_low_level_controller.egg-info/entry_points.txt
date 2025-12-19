@@ -1,0 +1,4 @@
+[console_scripts]
+thrust_to_pwm = slider_low_level_controller.thrust_to_pwm:main
+write_to_arduino = slider_low_level_controller.write_to_arduino:main
+

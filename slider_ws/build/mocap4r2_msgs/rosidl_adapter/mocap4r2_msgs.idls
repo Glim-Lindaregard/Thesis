@@ -1,0 +1,6 @@
+/root/slider_ws/build/mocap4r2_msgs/rosidl_adapter/mocap4r2_msgs:msg/Marker.idl
+/root/slider_ws/build/mocap4r2_msgs/rosidl_adapter/mocap4r2_msgs:msg/Markers.idl
+/root/slider_ws/build/mocap4r2_msgs/rosidl_adapter/mocap4r2_msgs:msg/ImusInfo.idl
+/root/slider_ws/build/mocap4r2_msgs/rosidl_adapter/mocap4r2_msgs:msg/RigidBody.idl
+/root/slider_ws/build/mocap4r2_msgs/rosidl_adapter/mocap4r2_msgs:msg/RigidBodies.idl
+/root/slider_ws/build/mocap4r2_msgs/rosidl_adapter/mocap4r2_msgs:srv/CreateRigidBody.idl

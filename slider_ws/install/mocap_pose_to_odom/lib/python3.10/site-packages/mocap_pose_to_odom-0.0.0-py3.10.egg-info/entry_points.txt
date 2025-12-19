@@ -1,0 +1,3 @@
+[console_scripts]
+mocap_pose_to_odom = mocap_pose_to_odom.mocap_pose_to_odom:main
+

@@ -1,0 +1,174 @@
+<?xml version='1.0'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="slider">
+    <xacro:include filename="dimensions.xacro"/>
+    
+    <!-- Body -->
+    <link name="body">
+        <collision name="body_col">
+            <geometry>
+                <cylinder radius="${body_r}" length="${body_l}"/>
+            </geometry>
+        </collision>
+
+        <visual name="body_vis">
+            <origin rpy="0 0 ${pi}"/>
+            <geometry>
+                <mesh filename="$(find slider_description)/meshes/slider_model_05.dae"/>
+                <!-- <mesh filename="package://slider_description/meshes/slider_model_05.dae"/> -->
+            </geometry>
+        </visual>     
+        
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="${mass}" />
+            <inertia 
+                ixx="${Ixx}" 
+                ixy="${Ixy}"
+                ixz="${Ixz}"
+                iyy="${Iyy}" 
+                iyz="${Iyz}"
+                izz="${Izz}" 
+            />
+        </inertial>
+    </link>
+
+    <!-- Thrusters -->
+    <link name="T11">
+        <visual>
+            <origin xyz="0 0 ${thruster_l / 2}" rpy="0 ${pi/2} 0"/>
+            <geometry>
+                <cylinder length="${thruster_l}" radius="${thruster_r}"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="T11_fix" type="fixed">
+        <origin xyz = "${thruster_d2} ${-thruster_d1} ${thruster_z}" rpy="0 0 0"/>
+        <parent link = "body"/>
+        <child link = "T11"/>
+    </joint>
+
+    <link name="T12">
+        <visual>
+            <origin xyz="0 0 ${thruster_l / 2}" rpy="0 ${pi/2} 0"/>
+            <geometry>
+                <cylinder length="${thruster_l}" radius="${thruster_r}"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="T12_fix" type="fixed">
+        <origin xyz = "${thruster_d1} ${-thruster_d2} ${thruster_z}" rpy="0 0 ${3*pi/2}"/>
+        <parent link = "body"/>
+        <child link = "T12"/>
+    </joint>
+
+    <link name="T21">
+        <visual>
+            <origin xyz="0 0 ${thruster_l / 2}" rpy="0 ${pi/2} 0"/>
+            <geometry>
+                <cylinder length="${thruster_l}" radius="${thruster_r}"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="T21_fix" type="fixed">
+        <origin xyz = "${-thruster_d2} ${-thruster_d1} ${thruster_z}" rpy="0 0 ${pi}"/>
+        <parent link = "body"/>
+        <child link = "T21"/>
+    </joint>
+
+    <link name="T22">
+        <visual>
+            <origin xyz="0 0 ${thruster_l / 2}" rpy="0 ${pi/2} 0"/>
+            <geometry>
+                <cylinder length="${thruster_l}" radius="${thruster_r}"/>
+            </geometry>
+        </visual> 
+    </link>
+    <joint name="T22_fix" type="fixed">
+        <origin xyz = "${-thruster_d1} ${-thruster_d2} ${thruster_z}" rpy="0 0 ${3*pi/2}"/>
+        <parent link = "body"/>
+        <child link = "T22"/>
+    </joint>
+
+    <link name="T31">
+        <visual>
+            <origin xyz="0 0 ${thruster_l / 2}" rpy="0 ${pi/2} 0"/>
+            <geometry>
+                <cylinder length="${thruster_l}" radius="${thruster_r}"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="T31_fix" type="fixed">
+        <origin xyz = "${-thruster_d2} ${thruster_d1} ${thruster_z}" rpy="0 0 ${pi}"/>
+        <parent link = "body"/>
+        <child link = "T31"/>
+    </joint>
+
+    <link name="T32">
+        <visual>
+            <origin xyz="0 0 ${thruster_l / 2}" rpy="0 ${pi/2} 0"/>
+            <geometry>
+                <cylinder length="${thruster_l}" radius="${thruster_r}"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="T32_fix" type="fixed">
+        <origin xyz = "${-thruster_d1} ${thruster_d2} ${thruster_z}" rpy="0 0 ${pi/2}"/>
+        <parent link = "body"/>
+        <child link = "T32"/>
+    </joint>
+
+    <link name="T41">
+        <visual>
+            <origin xyz="0 0 ${thruster_l / 2}" rpy="0 ${pi/2} 0"/>
+            <geometry>
+                <cylinder length="${thruster_l}" radius="${thruster_r}"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="T41_fix" type="fixed">
+        <origin xyz = "${thruster_d2} ${thruster_d1} ${thruster_z}" rpy="0 0 0"/>
+        <parent link = "body"/>
+        <child link = "T41"/>
+    </joint>
+
+    <link name="T42">
+        <visual>
+            <origin xyz="0 0 ${thruster_l / 2}" rpy="0 ${pi/2} 0"/>
+            <geometry>
+                <cylinder length="${thruster_l}" radius="${thruster_r}"/>
+            </geometry>
+        </visual> 
+    </link>
+    <joint name="T42_fix" type="fixed">
+        <origin xyz = "${thruster_d1} ${thruster_d2} ${thruster_z}" rpy="0 0 ${pi/2}"/>
+        <parent link = "body"/>
+        <child link = "T42"/>
+    </joint>
+
+    <!-- Camera -->
+    <!-- <link name="camera">
+        <visual name="camera_vis">
+            <origin xyz="0 0 0"/>
+            <geometry>
+                <box size="${2*cam_size} ${cam_size} ${cam_size}"/>
+            </geometry>
+        </visual>
+
+    </link>
+
+    <joint name="camera_fix" type="fixed">
+        <origin xyz = "${-0.5*body_x/2} 0 ${body_z / 2 + 0.04}"/>
+        <parent link = "body"/>
+        <child link = "camera"/>
+    </joint>
+
+    <link name="camera_optical"></link>
+    
+    <joint name="camera_optical_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+        <parent link="camera"/>
+        <child link="camera_optical"/>
+    </joint> -->
+    
+    <xacro:include filename="gazebo.xacro"/>
+</robot>

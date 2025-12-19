@@ -1,0 +1,4 @@
+[console_scripts]
+ftc_node = slider_ftc_control.ftc_node:main
+thruster_markers = slider_ftc_control.thruster_markers:main
+

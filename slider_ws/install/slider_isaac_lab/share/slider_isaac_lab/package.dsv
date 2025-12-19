@@ -1,0 +1,3 @@
+source;share/slider_isaac_lab/hook/pythonpath.ps1
+source;share/slider_isaac_lab/hook/pythonpath.dsv
+source;share/slider_isaac_lab/hook/pythonpath.sh

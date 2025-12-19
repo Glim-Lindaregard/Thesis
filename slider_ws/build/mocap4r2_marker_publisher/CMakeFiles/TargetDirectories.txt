@@ -1,0 +1,10 @@
+/root/slider_ws/build/mocap4r2_marker_publisher/CMakeFiles/uninstall.dir
+/root/slider_ws/build/mocap4r2_marker_publisher/CMakeFiles/mocap4r2_marker_publisher_uninstall.dir
+/root/slider_ws/build/mocap4r2_marker_publisher/CMakeFiles/mocap4r2_marker_publisher.dir
+/root/slider_ws/build/mocap4r2_marker_publisher/CMakeFiles/test.dir
+/root/slider_ws/build/mocap4r2_marker_publisher/CMakeFiles/edit_cache.dir
+/root/slider_ws/build/mocap4r2_marker_publisher/CMakeFiles/rebuild_cache.dir
+/root/slider_ws/build/mocap4r2_marker_publisher/CMakeFiles/list_install_components.dir
+/root/slider_ws/build/mocap4r2_marker_publisher/CMakeFiles/install.dir
+/root/slider_ws/build/mocap4r2_marker_publisher/CMakeFiles/install/local.dir
+/root/slider_ws/build/mocap4r2_marker_publisher/CMakeFiles/install/strip.dir

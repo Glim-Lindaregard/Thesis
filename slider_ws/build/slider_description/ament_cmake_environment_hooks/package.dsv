@@ -1,0 +1,4 @@
+source;share/slider_description/local_setup.bash
+source;share/slider_description/local_setup.dsv
+source;share/slider_description/local_setup.sh
+source;share/slider_description/local_setup.zsh

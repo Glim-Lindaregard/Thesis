@@ -53,7 +53,7 @@ for i = 1:N-1
         end
     
         % --- For each pair, generate facet vertices ---
-        ss = (n.'*A); 
+        ss = (n.'*A);
         s = zeros(1,N);
         for l = 1:N
             if (ss(l) < tol) && (ss(l) > -tol)
@@ -70,10 +70,10 @@ for i = 1:N-1
             %Calculate verteces
             if which == 1
                 %u = umin; u(s>0)=umax(s>0); u(s<0)=umin(s<0);
-                u = 0*umin; u(s == 1)=umax(s == 1); u(s == -1)=umin(s == -1);
+                u = umin; u(s == 1)=umax(s == 1); u(s == -1)=umin(s == -1);
             else
                 %u = umin; u(s>0)=umin(s>0); u(s<0)=umax(s<0);
-                u = 0*umin; u(s == 1)=umin(s == 1); u(s == -1)=umax(s == -1);
+                u = umin; u(s == 1)=umin(s == 1); u(s == -1)=umax(s == -1);
             end
             u1=u; u2=u; u3=u; u4=u;
             u1(i)=umin(i); u1(j)=umin(j);

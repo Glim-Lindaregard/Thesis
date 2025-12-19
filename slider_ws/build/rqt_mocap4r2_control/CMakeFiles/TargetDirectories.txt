@@ -1,0 +1,10 @@
+/root/slider_ws/build/rqt_mocap4r2_control/CMakeFiles/uninstall.dir
+/root/slider_ws/build/rqt_mocap4r2_control/CMakeFiles/rqt_mocap4r2_control_uninstall.dir
+/root/slider_ws/build/rqt_mocap4r2_control/CMakeFiles/rqt_mocap4r2_control.dir
+/root/slider_ws/build/rqt_mocap4r2_control/CMakeFiles/test.dir
+/root/slider_ws/build/rqt_mocap4r2_control/CMakeFiles/edit_cache.dir
+/root/slider_ws/build/rqt_mocap4r2_control/CMakeFiles/rebuild_cache.dir
+/root/slider_ws/build/rqt_mocap4r2_control/CMakeFiles/list_install_components.dir
+/root/slider_ws/build/rqt_mocap4r2_control/CMakeFiles/install.dir
+/root/slider_ws/build/rqt_mocap4r2_control/CMakeFiles/install/local.dir
+/root/slider_ws/build/rqt_mocap4r2_control/CMakeFiles/install/strip.dir

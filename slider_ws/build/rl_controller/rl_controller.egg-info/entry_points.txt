@@ -1,0 +1,6 @@
+[console_scripts]
+action_bounds = rl_controller.action_bounds:main
+lissajous_trajectory = target_trajectories.lissajous_trajectory:main
+policy = rl_controller.policy:main
+target_point = target_trajectories.target_point:main
+

@@ -1,0 +1,11 @@
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/uninstall.dir
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/mocap4r2_marker_viz_uninstall.dir
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/mocap4r2_marker_viz.dir
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/mocap4r2_marker_viz_NODE.dir
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/test.dir
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/edit_cache.dir
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/rebuild_cache.dir
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/list_install_components.dir
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/install.dir
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/install/local.dir
+/root/slider_ws/build/mocap4r2_marker_viz/CMakeFiles/install/strip.dir

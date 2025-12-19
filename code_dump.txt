@@ -1,0 +1,967 @@
+==================================================
+FILE: exportZeroClassHealthPDF.m
+==================================================
+function exportZeroClassHealthPDF(cases, uniqKeys, g, zeroIdx, pdfPath, ...
+    cfg_base, AMS_builder, u_min_base, u_max_base, u_active_stuck, N)
+% Export 2 cases per page in a 2x2 grid:
+%   Row 1: [Health | AMS]
+%   Row 2: [Health | AMS]
+%
+% Filters to INTERIOR only (recommended for clean PDF).
+
+if nargin < 5 || isempty(pdfPath)
+    pdfPath = 'zero_classes.pdf';
+end
+if exist(pdfPath,'file')
+    delete(pdfPath);
+end
+
+% Representative for each symmetry class
+numClassesAll = numel(uniqKeys);
+repsAll = zeros(numClassesAll,1);
+for ci = 1:numClassesAll
+    members = zeroIdx(g == ci);
+    repsAll(ci) = members(1);
+end
+
+% ---- Filter to INTERIOR only ----
+isInterior = ([cases(repsAll).zero_class] == "INTERIOR");
+reps = repsAll(isInterior);
+
+fprintf('Exporting %d / %d symmetry-class reps (INTERIOR only) to %s\n', ...
+    numel(reps), numel(repsAll), pdfPath);
+
+% quick preview toggle
+exportOnlyFirstPage = false;  % set true for 1 page (2 cases)
+if exportOnlyFirstPage
+    reps = reps(1:min(2,numel(reps)));
+end
+
+if isempty(reps)
+    warning('No INTERIOR representatives to export.');
+    return;
+end
+
+% Stable figure size => stable PDF pages
+fig = figure('Visible','off','Color','w','Units','pixels','Position',[100 100 1800 950]);
+tlo = tiledlayout(fig, 2, 2, 'TileSpacing','compact', 'Padding','compact');
+
+ci = 1;
+numCases = numel(reps);
+
+while ci <= numCases
+
+    % clear page tiles
+    for kk = 1:4
+        ax = nexttile(tlo, kk);
+        cla(ax);
+    end
+
+    % 2 rows => 2 cases/page
+    for r = 1:2
+        if ci > numCases, break; end
+
+        idx = reps(ci);
+        h   = cases(idx).health;
+
+        % Left tile: health plot
+        axL = nexttile(tlo, 2*r - 1);
+        cla(axL);
+        visualizeSliderHealth(h, axL);
+
+        act = cases(idx).active_idx;
+        pas = cases(idx).passive_idx;
+
+        title(axL, { ...
+            sprintf('rep case #%d | A=[%s] P=[%s]', idx, num2str(act), num2str(pas)), ...
+            sprintf('INTERIOR | margin=%.3e', cases(idx).margin) ...
+            }, 'Interpreter','none', 'Color',[0 0.6 0]);
+
+        % Right tile: AMS plot
+        axR = nexttile(tlo, 2*r);
+        cla(axR);
+
+        % --- NEW "buildAMS" for our purposes ---
+        [Ucurrent, cfg_case] = buildAMS_case(cfg_base, AMS_builder, ...
+            u_min_base, u_max_base, u_active_stuck, act, pas, N);
+
+        % --- NEW visualizeAMS that draws into axR (no new figure) ---
+        visualizeAMS_ax(Ucurrent, cfg_case.Acurrent, "normal", 0.7*[1 1 1]', [], [], axR);
+
+        ci = ci + 1;
+    end
+
+    drawnow;
+    exportgraphics(fig, pdfPath, 'Append', true);
+end
+
+close(fig);
+fprintf('Done. PDF saved: %s\n', pdfPath);
+end
+
+
+function [Ucurrent, cfg_case] = buildAMS_case(cfg_base, AMS_builder, ...
+    u_min_base, u_max_base, u_active_stuck, active_idx, passive_idx, N)
+
+
+
+% START FIX --------------------------------------------------
+
+% START FIX --------------------------------------------------
+
+% Default: nominal bounds (healthy thrusters behave normally)
+lb = u_min_base(:);
+ub = u_max_base(:);
+
+% Passive failures: clamp OFF
+if ~isempty(passive_idx)
+    lb(passive_idx) = 0.0;
+    ub(passive_idx) = 0.0;
+end
+
+% Active failures: clamp ON (stuck-on)
+if ~isempty(active_idx)
+    lb(active_idx) = u_active_stuck;
+    ub(active_idx) = u_active_stuck;
+end
+
+% END FIX ----------------------------------------------------
+
+
+% Passive failures are already OFF by default
+
+% END FIX ----------------------------------------------------
+
+cfg_case = cfg_base;
+cfg_case.u_min = lb;
+cfg_case.u_max = ub;
+
+if ~isfield(cfg_case,'Acurrent') || isempty(cfg_case.Acurrent)
+    cfg_case.Acurrent = cfg_case.A;
+end
+
+Ucurrent = AMS_builder(cfg_case);
+end
+
+
+
+function visualizeAMS_ax(U, Asys, mode, aProduced, ad, abc, ax)
+% visualizeAMS_ax
+% Copy of your visualizeAMS, modified to draw into an axes (tile) instead of creating figures.
+
+if nargin < 4 || isempty(aProduced), aProduced = [0;0;0]; end
+if nargin < 5 || isempty(ad),        ad        = [0;0;0]; end
+if nargin < 6 || isempty(abc),       abc       = [0;0;0]; end
+if nargin < 7 || isempty(ax) || ~isgraphics(ax,'axes')
+    error('visualizeAMS_ax requires a valid axes handle as 7th argument.');
+end
+
+mode = lower(string(mode));
+
+% --- preset styles (same as your function) ---
+switch mode
+    case "export"
+        FaceColor       = [0.8 0.95 0.95];
+        EdgeColor       = [0.3 0.3 0.3];
+        FaceAlpha       = 0.95;
+        EdgeAlpha       = 1;
+        LineWidth       = 0.8;
+        BackgroundColor = [1 1 1];
+        GridColor       = 0.3*[1 1 1];
+        GridAlpha       = 1;
+        GridStyle       = '--';
+        FontSize        = 18;
+        ViewAngles      = [55 30];
+        ShowProduced    = true;
+        ShowDesired     = true;
+        ShowBasis       = true;
+    case "normal"
+        FaceColor       = 0.75*[0.8 0.95 0.95];
+        EdgeColor       = [0 0 0];
+        FaceAlpha       = 0.95;
+        EdgeAlpha       = 1;
+        LineWidth       = 0.8;
+        BackgroundColor = [1 1 1];          % <- IMPORTANT: white for PDF tiles
+        GridColor       = 0.2*[1 1 1];
+        GridAlpha       = 1;
+        GridStyle       = '--';
+        FontSize        = 12;
+        ViewAngles      = [55 25];
+        ShowProduced    = true;
+        ShowDesired     = true;
+        ShowBasis       = false;
+    otherwise
+        error('visualizeAMS_ax:UnknownMode','Mode must be "normal" or "export".');
+end
+
+facetIndex = 1;
+
+% --- axes setup (NO FIGURE CREATION) ---
+cla(ax);
+hold(ax,'on');
+set(ancestor(ax,'figure'),'Renderer','painters','Color',BackgroundColor);
+set(ax,'Color',BackgroundColor);
+
+count  = size(U,3);
+scale  = 2;
+center = [0 0 0];
+
+axis(ax,'manual'); axis(ax,'equal'); axis(ax,'vis3d');
+xlim(ax,[-scale,scale]);
+ylim(ax,[-scale,scale]);
+zlim(ax,[-scale/4,scale/4]);
+view(ax, ViewAngles(1), ViewAngles(2));
+
+lgHandles = [];
+lgLabels  = {};
+
+% --- draw facets ---
+for k = 1:count
+    Uk    = U(:,:,k);
+    Vk    = Asys*Uk;
+    verts = Vk;
+
+    A = verts(:,1)'; B = verts(:,2)'; C = verts(:,3)'; D = verts(:,4)';
+    tris = [A; B; C; D];
+    f    = [1 2 3 4];
+
+    isHighlighted = (k == facetIndex) && (ShowBasis || ShowProduced);
+
+    if isHighlighted
+        patch(ax,'Faces',f,'Vertices',tris, ...
+          'FaceColor','r','FaceAlpha',0.5, ...
+          'EdgeColor',EdgeColor,'EdgeAlpha',EdgeAlpha,'LineWidth',LineWidth, ...
+          'EdgeLighting','none','FaceLighting','flat','HandleVisibility','off');
+    else
+        patch(ax,'Faces',f,'Vertices',tris, ...
+          'FaceColor',FaceColor,'FaceAlpha',FaceAlpha, ...
+          'EdgeColor',EdgeColor,'EdgeAlpha',EdgeAlpha,'LineWidth',LineWidth, ...
+          'EdgeLighting','none','FaceLighting','flat','HandleVisibility','off');
+    end
+end
+
+% --- produced / desired wrenches ---
+if ShowProduced
+    hProd = quiver3(ax, center(1),center(2),center(3), ...
+                    aProduced(1), aProduced(2), aProduced(3), ...
+                    'AutoScale','off','Color','b', ...
+                    'LineWidth',1.5,'MaxHeadSize',0.8);
+    lgHandles(end+1) = hProd;
+    lgLabels{end+1}  = 'Moment produced';
+end
+
+if ShowDesired
+    hDes = quiver3(ax, center(1),center(2),center(3), ...
+                   ad(1), ad(2), ad(3), ...
+                   'AutoScale','off','Color','r', ...
+                   'LineWidth',2,'MaxHeadSize',0.8);
+    lgHandles(end+1) = hDes;
+    lgLabels{end+1}  = 'Desired moment';
+end
+
+% --- axes / labels / legend ---
+box(ax,'on'); grid(ax,'on');
+ax.GridColor     = GridColor;
+ax.GridAlpha     = GridAlpha;
+ax.GridLineStyle = GridStyle;
+ax.XMinorGrid    = 'off';
+ax.YMinorGrid    = 'off';
+ax.ZMinorGrid    = 'off';
+ax.FontSize      = FontSize;
+ax.LineWidth     = LineWidth;
+ax.Projection    = 'perspective';
+ax.XColor        = 'k';
+ax.YColor        = 'k';
+ax.ZColor        = 'k';
+
+xlabel(ax,'F_x (N)','Interpreter','tex');
+ylabel(ax,'F_y (N)','Interpreter','tex');
+zlabel(ax,'T_z (N·m)','Interpreter','tex');
+title(ax,'Attainable Moment Set','Color','k');
+
+if ~isempty(lgHandles)
+    legend(ax, lgHandles, lgLabels{:}, 'TextColor','k', 'Location','best');
+end
+
+hold(ax,'off');
+end
+
+==================================================
+FILE: AMS_number_test.m
+==================================================
+%% count_zero_AMS_active_passive_hull_with_symmetry.m
+% Enumerate all thruster-state configurations:
+%   - N=8 thrusters
+%   - <=4 failures total (passive+active)
+%   - <=2 active failures
+% Passive failure: clamp OFF  (umin=0,   umax=0)
+% Active failure : clamp ON   (umin=0.7, umax=0.7)
+%
+% For each config:
+%   - build AMS using buildAMS_row / buildAMSRow
+%   - map to wrench-space V = A*U
+%   - test if zero wrench is inside or strictly interior of convex hull in wrench space
+%
+% NEW: For all cases that contain zero, compute rotational + mirror symmetry classes
+%      using the platform thruster geometry (D4 group).
+%
+% Requirements:
+%   - buildAMS_row(cfg) or buildAMSRow(cfg)
+%   - cfg_base = config() providing cfg_base.A (3x8), cfg_base.u_min (8x1), cfg_base.u_max (8x1)
+%   - convhulln
+
+clear; clc;
+
+%% --- USER: load your base config here ---
+cfg_base = config();    % <-- CHANGE if needed
+
+A = cfg_base.A;
+N = size(A,2);
+assert(N == 8, 'This script assumes 8 thrusters.');
+
+u_min_base = cfg_base.u_min(:);
+u_max_base = cfg_base.u_max(:);
+
+%% --- knobs ---
+max_failed_total = 4;
+max_active       = 3;
+
+u_active_stuck   = 0.7;     % clamp active thruster at exactly this level
+tol_inside       = 1e-8;    % inside/feas tolerance (geometry)
+tol_interior     = 1e-6;    % strictly interior margin threshold
+
+STORE_AMS_POINTS = false;   % keep U/V if you want later plotting (not needed for symmetry printing)
+
+% pick your AMS builder name here
+if exist('buildAMS_row','file') == 2
+    AMS_builder = @buildAMS_row;
+elseif exist('buildAMSRow','file') == 2
+    AMS_builder = @buildAMSRow;
+else
+    error('Could not find buildAMS_row or buildAMSRow on MATLAB path.');
+end
+
+%% --- thruster geometry (for symmetry permutations) ---
+% From the Slider paper Table III (positions in mm, orientations in degrees). :contentReference[oaicite:1]{index=1}
+% NOTE: some PDFs show a typo for T7 position; the symmetric layout should be:
+thr_pos = [ ...
+     195, -140;  % T1
+     140, -195;  % T2
+    -195, -140;  % T3
+    -140, -195;  % T4
+    -195,  140;  % T5
+    -140,  195;  % T6
+     195,  140;  % T7  (symmetry-consistent)
+     140,  195]; % T8
+
+thr_beta_deg = [ ...
+      0;   % T1
+    270;   % T2
+    180;   % T3
+    270;   % T4
+    180;   % T5
+     90;   % T6
+      0;   % T7
+     90];  % T8
+
+% Build D4 permutations from geometry
+perms = buildD4Perms(thr_pos, thr_beta_deg);
+
+%% --- storage / counters ---
+count_total = 0;
+count_zero  = 0;
+count_edge  = 0;
+count_int   = 0;
+
+cases = struct( ...
+    'active_idx', {}, ...
+    'passive_idx', {}, ...
+    'zero_contains', {}, ...
+    'zero_class', {}, ...
+    'margin', {}, ...
+    'U', {}, ...
+    'V', {}, ...
+    'health', {} );
+
+thrusters = 1:N;
+
+%% --- enumerate configurations ---
+for a = 0:max_active
+    active_sets = nchoosek(thrusters, a);
+    if a == 0, active_sets = zeros(1,0); end
+
+    for ia = 1:size(active_sets,1)
+        active_idx = active_sets(ia,:);
+        remaining1 = setdiff(thrusters, active_idx);
+
+        max_passive_here = max_failed_total - a;
+        for p = 0:max_passive_here
+            passive_sets = nchoosek(remaining1, p);
+            if p == 0, passive_sets = zeros(1,0); end
+
+            for ip = 1:size(passive_sets,1)
+                passive_idx = passive_sets(ip,:);
+                
+                % ---- bounds for this case ----
+                lb = u_min_base;
+                ub = u_max_base;
+
+                % passive: clamp OFF
+                if ~isempty(passive_idx)
+                    lb(passive_idx) = 0.0;
+                    ub(passive_idx) = 0.0;
+                end
+
+                % active: clamp ON (exact)
+                if ~isempty(active_idx)
+                    lb(active_idx) = u_active_stuck;
+                    ub(active_idx) = u_active_stuck;
+                end
+
+                % ---- build AMS (thruster-space points) ----
+                cfg = cfg_base;
+                cfg.u_min = lb;
+                cfg.u_max = ub;
+
+                Uraw = AMS_builder(cfg);
+
+                % Convert builder output into an 8xM numeric matrix of points.
+                U = coerceU(Uraw, N);         % handles 8x4xF
+
+                % Map to wrench space
+                V = A * U;  % 3xM
+
+                % ---- classify zero in wrench-space convex hull ----
+                [inside, interior, margin] = zeroInsideHull(V, tol_inside, tol_interior);
+
+                if ~inside
+                    zclass = "NO";
+                elseif interior
+                    zclass = "INTERIOR";
+                else
+                    zclass = "EDGE";
+                end
+
+                % ---- counters ----
+                count_total = count_total + 1;
+
+                if inside
+                    count_zero = count_zero + 1;
+                    if interior
+                        count_int = count_int + 1;
+                    else
+                        count_edge = count_edge + 1;
+                    end
+                end
+
+                % ---- store ----
+                cases(end+1).active_idx    = active_idx; %#ok<SAGROW>
+                cases(end).passive_idx     = passive_idx;
+                cases(end).zero_contains   = inside;
+                cases(end).zero_class      = zclass;
+                cases(end).margin          = margin;
+
+                % health encoding: 1=healthy, 0=passive, 2=active
+                h = ones(1,N);
+                h(passive_idx) = 0;
+                h(active_idx)  = 2;
+                cases(end).health = h;
+
+                if STORE_AMS_POINTS
+                    cases(end).U = U;
+                    cases(end).V = V;
+                else
+                    cases(end).U = [];
+                    cases(end).V = [];
+                end
+            end
+        end
+    end
+end
+
+%% --- report ---
+fprintf('Total cases (<=%d failed, <=%d active): %d\n', max_failed_total, max_active, count_total);
+fprintf('Cases containing zero wrench: %d\n', count_zero);
+fprintf('  - Interior (wrench-hull): %d\n', count_int);
+fprintf('  - Edge (wrench-hull)    : %d\n', count_edge);
+
+% =====================================================================
+% KEEP THIS PRINTING (your requested block) – unchanged, just pasted in
+% =====================================================================
+
+% ------------------------------------------------------------
+% FIRST: print all INTERIOR cases with exactly 2 active + 2 passive
+% ------------------------------------------------------------
+fprintf('\nINTERIOR cases with exactly 2 active + 2 passive failures:\n');
+
+hit_count = 0;
+for i = 1:numel(cases)
+    c = cases(i);
+
+    if c.zero_contains && c.zero_class == "INTERIOR" ...
+            && numel(c.active_idx) == 2 ...
+            && numel(c.passive_idx) == 2
+
+        hit_count = hit_count + 1;
+        fprintf('#%4d  active=[%s]  passive=[%s]  margin=%.3e\n', ...
+            i, num2str(c.active_idx), num2str(c.passive_idx), c.margin);
+    end
+end
+
+fprintf('Total INTERIOR cases with 2 active + 2 passive: %d\n', hit_count);
+
+% ------------------------------------------------------------
+% THEN: original print (unchanged)
+% ------------------------------------------------------------
+idx0 = find([cases.zero_contains]);
+fprintf('\nFirst 100 cases containing zero:\n');
+
+k = 1;
+while k < min(100, numel(idx0))
+    c = cases(idx0(k));
+
+    fprintf('#%4d  active=[%s]  passive=[%s]  class=%s  margin=%.3e\n', ...
+        idx0(k), num2str(c.active_idx), num2str(c.passive_idx), c.zero_class, c.margin);
+
+    k = k + 1;
+end
+
+% =====================================================================
+% NEW: Symmetry classification for ALL cases that contain zero wrench
+% =====================================================================
+
+fprintf('\n============================================================\n');
+fprintf('SYMMETRY CLASSES (D4 rotations + mirrors) FOR ZERO-CONTAINING CASES\n');
+fprintf('============================================================\n');
+
+% Build canonical key for each zero-containing case
+keys = strings(1, numel(cases));
+isZero = [cases.zero_contains];
+
+for i = 1:numel(cases)
+    if ~isZero(i)
+        keys(i) = "";
+        continue;
+    end
+    h = cases(i).health;
+    keys(i) = canonicalHealthKey(h, perms);
+end
+
+% Group by key
+zeroIdx = find(isZero);
+zeroKeys = keys(zeroIdx);
+[uniqKeys, ~, g] = unique(zeroKeys);
+
+exportZeroClassHealthPDF(cases, uniqKeys, g, zeroIdx, 'zero_containing_symmetry_classes.pdf', ...
+    cfg_base, AMS_builder, u_min_base, u_max_base, u_active_stuck, N);
+
+
+
+
+% Print summary
+fprintf('Zero-containing cases: %d\n', numel(zeroIdx));
+fprintf('Unique symmetry classes among them: %d\n\n', numel(uniqKeys));
+
+printed = 0;
+
+for ci = 1:numel(uniqKeys)
+    members_local = zeroIdx(g == ci);     % indices into "cases"
+    rep = members_local(1);
+    hrep = cases(rep).health;
+
+    act = find(hrep == 2);
+    pas = find(hrep == 0);
+
+    % --- FILTER: only print classes that have BOTH active and passive present ---
+    if isempty(act) || isempty(pas)
+        continue;
+    end
+
+    printed = printed + 1;
+
+    fprintf('Class %3d | size=%3d | rep case #%d | active=[%s] passive=[%s] class=%s margin=%.3e | health=[%s]\n', ...
+        ci, numel(members_local), rep, num2str(act), num2str(pas), cases(rep).zero_class, cases(rep).margin, num2str(hrep));
+
+    fprintf('  members: ');
+    for jj = 1:numel(members_local)
+        fprintf('%d', members_local(jj));
+        if jj < numel(members_local), fprintf(','); end
+    end
+    fprintf('\n\n');
+end
+
+fprintf('Printed %d symmetry classes containing zero with BOTH active and passive present.\n', printed);
+
+
+%% ===================== helper functions =====================
+
+function U = coerceU(Uraw, N)
+% Turn AMS builder output into an N x M numeric matrix of points.
+% Supports numeric 3D arrays N x 4 x F (your case: 8x4x56).
+
+if isnumeric(Uraw)
+    U = Uraw;
+
+    if ndims(U) == 3
+        % U is N x 4 x F  -> flatten to N x (4F)
+        if size(U,1) ~= N
+            error('3D AMS points: expected first dim %d, got %d.', N, size(U,1));
+        end
+        U = reshape(U, N, []);  % N x (4*F)
+    end
+
+elseif isstruct(Uraw)
+    if isfield(Uraw,'U')
+        U = Uraw.U;
+    elseif isfield(Uraw,'verts')
+        U = Uraw.verts;
+    elseif isfield(Uraw,'points')
+        U = Uraw.points;
+    else
+        error('AMS builder returned a struct, but no recognized field (U/verts/points).');
+    end
+
+    if isnumeric(U) && ndims(U) == 3
+        if size(U,1) ~= N
+            error('3D AMS points in struct: expected first dim %d, got %d.', N, size(U,1));
+        end
+        U = reshape(U, N, []);
+    end
+else
+    error('AMS builder returned unsupported type: %s', class(Uraw));
+end
+
+% Ensure N x M
+if size(U,1) ~= N && size(U,2) == N
+    U = U.'; % transpose if it came out M x N
+end
+if size(U,1) ~= N
+    error('AMS points have wrong dimension. Expected %dxM, got %dx%d.', N, size(U,1), size(U,2));
+end
+
+% Drop any NaN columns defensively
+bad = any(~isfinite(U),1);
+U(:,bad) = [];
+if isempty(U)
+    error('AMS point set is empty after cleaning.');
+end
+end
+
+function [inside, interior, margin] = zeroInsideHull(V, tol_inside, tol_interior)
+% V: 3xM wrench points (columns)
+% inside   : origin is in convex hull (including boundary)
+% interior : origin is strictly inside (margin > tol_interior)
+% margin   : smallest "inside distance" to any hull facet (larger => more interior)
+
+inside = false;
+interior = false;
+margin = 0;
+
+M = size(V,2);
+if M < 4
+    return;
+end
+
+X = V.'; % Mx3
+
+try
+    K = convhulln(X);
+catch
+    return;
+end
+
+c = mean(X,1).';
+margin = inf;
+inside = true;
+
+for i = 1:size(K,1)
+    p1 = X(K(i,1),:).';
+    p2 = X(K(i,2),:).';
+    p3 = X(K(i,3),:).';
+
+    n = cross(p2-p1, p3-p1);
+    nn = norm(n);
+    if nn < 1e-12
+        continue;
+    end
+    n = n/nn;
+
+    % Orient normal so centroid is on the "inside" side
+    if dot(n, c - p1) > 0
+        n = -n;
+    end
+
+    % Signed distance of origin to plane: d = -n·p1
+    d = -dot(n, p1);
+
+    if d > tol_inside
+        inside = false;
+        margin = 0;
+        break;
+    end
+
+    margin = min(margin, -d);
+end
+
+interior = inside && (margin > tol_interior);
+end
+
+function perms = buildD4Perms(pos_xy, beta_deg)
+% Build the 8 D4 symmetry permutations (4 rotations + 4 reflections)
+% from thruster positions and their direction angles beta.
+%
+% Returns perms as 8x8 integer matrix:
+%   perms(g,i) = j  means thruster i maps to index j under symmetry g
+%
+% Applying to a health vector h:
+%   h_new(perms(g,i)) = h(i)
+
+N = size(pos_xy,1);
+assert(N == 8, 'Expected 8 thrusters.');
+
+pos = pos_xy;
+dir = [cosd(beta_deg), sind(beta_deg)];
+
+tol_pos = 1e-6;
+tol_dir = 1e-6;
+
+perms = zeros(8,N);
+
+% Define 8 transforms: R0,R90,R180,R270 then mirrorX∘Rk (mirror about x-axis)
+% Use 2x2 matrices for positions, and apply same to direction vectors.
+rots = cat(3, ...
+    [ 1  0; 0  1], ...
+    [ 0 -1; 1  0], ...
+    [-1  0; 0 -1], ...
+    [ 0  1;-1  0]);
+
+mirrorX = [1 0; 0 -1];
+
+g = 0;
+
+for k = 1:4
+    R = rots(:,:,k);
+
+    % rotation
+    g = g+1;
+    perms(g,:) = matchPerm(pos, dir, R, pos, dir, tol_pos, tol_dir);
+
+    % reflection-after-rotation
+    g = g+1;
+    M = mirrorX * R;
+    perms(g,:) = matchPerm(pos, dir, M, pos, dir, tol_pos, tol_dir);
+end
+end
+
+function p = matchPerm(pos_src, dir_src, T, pos_tgt, dir_tgt, tol_pos, tol_dir)
+% Find permutation p(i)=j matching transformed (pos,dir) of i to target j.
+
+N = size(pos_src,1);
+p = zeros(1,N);
+used = false(1,N);
+
+for i = 1:N
+    pos_i = (T * pos_src(i,:).').';
+    dir_i = (T * dir_src(i,:).').';
+
+    % normalize direction
+    if norm(dir_i) > 0
+        dir_i = dir_i / norm(dir_i);
+    end
+
+    found = 0;
+
+    for j = 1:N
+        if used(j), continue; end
+
+        if norm(pos_tgt(j,:) - pos_i) <= tol_pos
+            dj = dir_tgt(j,:);
+            if norm(dj) > 0
+                dj = dj / norm(dj);
+            end
+            if norm(dj - dir_i) <= tol_dir || norm(dj + dir_i) <= tol_dir
+                found = j;
+                break;
+            end
+        end
+    end
+
+    if found == 0
+        error('Could not match transformed thruster %d to any target index. Check pos/beta consistency.', i);
+    end
+
+    p(i) = found;
+    used(found) = true;
+end
+end
+
+function key = canonicalHealthKey(h, perms)
+% Return a canonical string key for health vector h under all symmetry perms.
+% h is 1x8 with values {0,1,2}.
+% canonical = lexicographically minimal representation under D4 symmetry.
+
+best = string("");   % empty string = unset
+
+for g = 1:size(perms,1)
+    p  = perms(g,:);
+    ht = applyPerm(h, p);          % hnew(p(i)) = h(i)
+    s  = string(sprintf('%d', ht)); % e.g. "11200121"
+
+    if best == "" || s < best      % STRING comparison -> scalar logical
+        best = s;
+    end
+end
+
+key = best;
+end
+
+
+
+function hnew = applyPerm(h, p)
+% Apply permutation p(i)=j to health vector:
+%   hnew(j) = h(i) where j=p(i)
+
+N = numel(h);
+hnew = zeros(1,N);
+for i = 1:N
+    hnew(p(i)) = h(i);
+end
+end
+
+==================================================
+FILE: Code/MATLAB/DA-demo/visualizeSliderHealth.m
+==================================================
+function visualizeSliderHealth(health, ax)
+% visualizeSliderHealth(health, ax)
+% health: 1x8 or 8x1 with values:
+%   1 = healthy   (gray)
+%   0 = passive   (red)
+%   2 = active    (blue)
+%
+% Layout per your sketch. Arrows point from outside into the square.
+
+health = health(:).';
+if numel(health) ~= 8
+    error('health must have 8 elements.');
+end
+
+% --- geometry (drawing scale) ---
+a = 220;
+corners = [ a  a;   -a  a;   -a -a;    a -a];  % [TR; TL; BL; BR]
+
+thr_corner = [1 1 2 2 3 3 4 4];
+dir = [ ...
+   -1  0;   % T1
+    0 -1;   % T2
+    0 -1;   % T3
+    1  0;   % T4
+    1  0;   % T5
+    0  1;   % T6
+    0  1;   % T7
+   -1  0];  % T8
+
+dir = -dir;
+
+
+pos = corners(thr_corner,:);
+
+% --- plotting frame ---
+if nargin < 2 || isempty(ax)
+    fig = figure('Color','w');
+    ax = axes('Parent', fig);
+end
+
+cla(ax);
+hold(ax,'on');
+axis(ax,'equal');
+
+set(gcf,'Color','w');                 % figure background
+set(ax,'Color','w');                  % axes background
+set(ax,'XColor','k','YColor','k');    % axis numbers black
+
+marg = 0.60*a;
+xlim(ax, [-a-marg, a+marg]);
+ylim(ax, [-a-marg, a+marg]);
+
+rectangle(ax,'Position',[-a -a 2*a 2*a],'LineWidth',2);
+
+% Colors
+colHealthy = [0.35 0.35 0.35];
+colPassive = [1.00 0.20 0.20];
+colActive  = [0.20 0.45 1.00];
+
+% Style knobs
+L        = 0.35*a;    % arrow length (from outside toward corner)
+ms       = 9;         % marker size
+headGap  = 0.12*a;    % pull arrowhead back from corner (MUST be positive)
+arrowLW  = 2.5;       % arrow line width
+arrowHead= 3.2;       % arrow head size
+
+% Label offsets (bigger + tuned)
+labelOffset = 0.30*a * [ ...
+     1.2,  0.2;   % T1  (TR, push right)
+     0.2,  1.2;   % T2  (TR, push up)
+    -0.2,  1.2;   % T3  (TL, push up)
+    -1.2,  0.2;   % T4  (TL, push left)
+    -1.2, -0.2;   % T5  (BL, push left)
+    -0.2, -1.2;   % T6  (BL, push down)
+     0.2, -1.2;   % T7  (BR, push down)
+     1.2, -0.2];  % T8  (BR, push right)
+
+for i = 1:8
+    if health(i) == 0
+        c = colPassive;
+    elseif health(i) == 2
+        c = colActive;
+    else
+        c = colHealthy;
+    end
+
+    % --- Arrow with HEAD on the OUTSIDE ---
+    % --- Arrow (HEAD OUTSIDE), full length, not hidden by marker ---
+    d = dir(i,:) / max(norm(dir(i,:)), eps);
+    
+    % Start just outside the marker, at the corner
+    tail = pos(i,:) + (0.55*ms) * d;   % push tail away from corner by ~marker radius
+    
+    % Full arrow length outward
+    dx = L * d(1);
+    dy = L * d(2);
+    
+    quiver(ax, tail(1), tail(2), dx, dy, 0, ...
+        'LineWidth', arrowLW, 'MaxHeadSize', arrowHead, 'Color', c);
+
+
+
+    % --- Marker (draw on top) ---
+    plot(ax, pos(i,1), pos(i,2), 'ko', 'MarkerFaceColor', c, 'MarkerSize', ms);
+
+    % --- Label (black, with white background; aligned away from center) ---
+    ptxt = pos(i,:) + labelOffset(i,:);
+
+    if ptxt(1) > 0, ha = 'left';  else, ha = 'right'; end
+    if ptxt(2) > 0, va = 'bottom'; else, va = 'top'; end
+
+    text(ax, ptxt(1), ptxt(2), sprintf('%d', i), ...
+        'FontSize', 14, 'FontWeight','bold', 'Color','k', ...
+        'HorizontalAlignment', ha, 'VerticalAlignment', va, ...
+        'BackgroundColor','w', 'Margin', 1);
+end
+
+% --- Legend: use real (finite) arrows so glyphs show up ---
+Lleg = 0.15*a;
+hH = quiver(ax, -10*a, -10*a, Lleg, 0, 0, 'Color', colHealthy, 'LineWidth', 2, 'MaxHeadSize', 1.5);
+hA = quiver(ax, -10*a, -10*a, Lleg, 0, 0, 'Color', colActive,  'LineWidth', 2, 'MaxHeadSize', 1.5);
+hP = quiver(ax, -10*a, -10*a, Lleg, 0, 0, 'Color', colPassive, 'LineWidth', 2, 'MaxHeadSize', 1.5);
+
+lgd = legend(ax, [hH hA hP], {'Healthy','Active','Passive'}, 'Location', 'bestoutside');
+set(lgd,'TextColor','k','Color','w','EdgeColor',[0.2 0.2 0.2]);
+
+title(ax, 'Thruster health (arrows point into the square)', 'Color','k');
+xlabel(ax, 'x', 'Color','k');
+ylabel(ax, 'y', 'Color','k');
+grid(ax, 'on');
+
+hold(ax,'off');
+end
+

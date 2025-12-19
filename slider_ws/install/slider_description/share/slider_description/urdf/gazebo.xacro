@@ -1,0 +1,92 @@
+<?xml version='1.0'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Materials -->
+    <gazebo reference="body">
+        <material>Gazebo/DarkGrey</material>
+    </gazebo>
+    <gazebo reference="T11">
+        <material>Gazebo/Red</material>
+    </gazebo>
+    <gazebo reference="T12">
+        <material>Gazebo/Red</material>
+    </gazebo>
+    <gazebo reference="T21">
+        <material>Gazebo/Red</material>
+    </gazebo>
+    <gazebo reference="T22">
+        <material>Gazebo/Red</material>
+    </gazebo>
+    <gazebo reference="T31">
+        <material>Gazebo/Red</material>
+    </gazebo>
+    <gazebo reference="T32">
+        <material>Gazebo/Red</material>
+    </gazebo>
+    <gazebo reference="T41">
+        <material>Gazebo/Red</material>
+    </gazebo>
+    <gazebo reference="T42">
+        <material>Gazebo/Red</material>
+    </gazebo>
+    <!-- <gazebo reference="camera">
+        <material>Gazebo/Red</material>
+    </gazebo> -->
+
+    <!-- Plugins -->
+    <gazebo>
+        <!-- Legacy Gazebo plugin -->
+        <!-- <plugin name="controller_plugin" filename="libgazebo_ros_force.so">
+            <link_name>body</link_name>
+            <force_frame>link</force_frame>
+        </plugin> -->
+
+        <!-- Custom Gazebo plugin -->
+        <plugin name="controller" filename="libslider_controller.so">
+            <!-- <force>0.9</force>
+            <torque>0.126</torque> -->
+        </plugin>
+
+        <!-- Odometry relative to world -->
+        <plugin name="p3d" filename="libgazebo_ros_p3d.so">
+            <frame_name>world</frame_name>
+            <body_name>body</body_name>
+            <topic_name>slider_odom</topic_name>
+            <update_rate>30.0</update_rate>
+        </plugin>
+    </gazebo>
+    
+    <!-- Camera -->
+    <!-- <gazebo reference="camera">
+        <sensor type="camera" name="front_cam">
+            <update_rate>60</update_rate>
+            <visualize>true</visualize>
+
+            <camera name="cam">
+                <horizontal_fov>1.04699999</horizontal_fov>
+                <image>
+                    <width>1280</width>
+                    <height>720</height>
+                    <format>R8G8B8</format>
+                </image>
+                <clip>
+                    <near>0.02</near>
+                    <far>300</far>
+                </clip>
+                <noise>
+                    <type>gaussian</type>
+                    <mean>0.0</mean>
+                    <stddev>0.0</stddev>
+                </noise>
+            </camera>
+
+            <plugin name="camera_plugin" filename="libgazebo_ros_camera.so">
+                <frameName>camera_optical</frameName>
+                <min_depth>0.1</min_depth>
+                <max_depth>500</max_depth>
+            </plugin>
+
+        </sensor>
+    </gazebo> -->
+
+</robot>

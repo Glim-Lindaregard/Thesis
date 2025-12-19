@@ -1,0 +1,4 @@
+[console_scripts]
+lissajous_trajectory = target_trajectories.lissajous_trajectory:main
+target_point = target_trajectories.target_point:main
+
