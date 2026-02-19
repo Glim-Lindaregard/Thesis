@@ -1,183 +1,184 @@
+
 function visualizeAMS(U, Asys, mode, aProduced, ad, abc)
+%VISUALIZEAMS  Subplot-safe AMS visualization (no figure/axes side effects)
 
-    % --- defaults for optional vectors ---
-    if nargin < 4 || isempty(aProduced), aProduced = [0;0;0]; end
-    if nargin < 5 || isempty(ad),        ad        = [0;0;0]; end
-    if nargin < 6 || isempty(abc),      abc       = [0;0;0]; end
-
+    % ---------------- Defaults ----------------
+    if nargin < 3 || isempty(mode),       mode       = "normal"; end
+    if nargin < 4 || isempty(aProduced),  aProduced  = [0;0;0]; end
+    if nargin < 5 || isempty(ad),         ad         = [0;0;0]; end
+    if nargin < 6 || isempty(abc),        abc        = [0;0;0]; end
 
     mode = lower(string(mode));
-    doExport = strcmp(mode, "export");
+    doExport = (mode == "export");
 
-    % --- preset styles ---
+    % ---------------- Styles ----------------
     switch mode
         case "export"
-            FaceColor       = [0.8 0.95 0.95];
-            EdgeColor       = [0.3 0.3 0.3];
-            FaceAlpha       = 0.95;
-            EdgeAlpha       = 1;
-            LineWidth       = 0.8;
-            BackgroundColor = [1 1 1];
-            GridColor       = 0.3*[1 1 1];
-            GridAlpha       = 1;
-            GridStyle       = '--';
-            FontSize        = 30;
-            ViewAngles      = [55 30];
-            ShowProduced    = true;
-            ShowDesired     = true;
-            ShowBasis       = true;
-        case "normal"
-            FaceColor       = 0.75*[0.8 0.95 0.95];
-            EdgeColor       = [0 0 0];
-            FaceAlpha       = 0.95;
-            EdgeAlpha       = 1;
-            LineWidth       = 0.8;
-            BackgroundColor = 0.2*[1 1 1];
-            GridColor       = 0.7*[1 1 1];
-            GridAlpha       = 1;
-            GridStyle       = '--';
-            FontSize        = 11;
-            ViewAngles      = [55 25];
-            ShowProduced    = true;
-            ShowDesired     = true;
-            ShowBasis       = false;
-        otherwise
-            error('visualizeAMS:UnknownMode','Mode must be "normal" or "export".');
+            FaceColor  = [0.8 0.95 0.95];
+            EdgeColor  = [0.3 0.3 0.3];
+            FontSize   = 20;
+            ViewAngles = [35 20];
+            ShowBasis  = false;
+        otherwise  % "normal"
+            FaceColor  = 0.75*[0.8 0.95 0.95];
+            EdgeColor  = [0 0 0];
+            FontSize   = 10;
+            ViewAngles = [45 25];
+            ShowBasis  = false;
     end
 
-    facetIndex = 1;   % which facet to highlight
+    FaceAlpha = 1.0;
+    LineWidth = 1.5;
+    ShowProduced = false;
+    ShowDesired  = false;
 
-    % --- basic figure setup ---
-    figure('Color', BackgroundColor); hold on;
-    set(gcf,'Renderer','painters');
+    % ---------------- Axes setup ----------------
+    ax = gca;
+    % Dummy handles for legend
+    hSimplified = patch(ax, ...
+        'Faces',[], 'Vertices',[], ...
+        'FaceColor',[0.2 0.6 0.9], ...
+        'EdgeColor',[0.3 0.3 0.3], ...
+        'FaceAlpha',0.8);
+    
+    hTrue = patch(ax, ...
+        'Faces',[], 'Vertices',[], ...
+        'FaceColor',[0.85 0.2 0.2], ...
+        'EdgeColor',[0.3 0.3 0.3], ...
+        'FaceAlpha',0.8);
 
-    count  = size(U,3);
-    scale  = 2;
-    center = [0 0 0];
+    hold(ax,'on');
+    %axis(ax,'equal');
+    axis(ax,'vis3d');
+    %view(ax, ViewAngles);
+    %view(3);
 
-    axis manual; axis equal; axis vis3d;
-    xlim([-scale,scale]);
-    ylim([-scale,scale]);
-    zlim([-scale/4,scale/4]);
-    view(ViewAngles(1), ViewAngles(2));
+    set(gcf,'Color','w');
+    set(ax,'Color','w');
+    %grid(ax,"minor")
+    
+    ax.GridColor      = 0.3*[1 1 1];
+    ax.GridLineStyle = "--";
+    ax.MinorGridColor = EdgeColor;
+    ax.GridAlpha      = 0.8;
+    ax.MinorGridAlpha = 0.8;
+    
+    ax.XColor = EdgeColor;
+    ax.YColor = EdgeColor;
+    ax.ZColor = EdgeColor;
+    
+    ax.LineWidth = 1.2;
+    %ax.FontName = 'Times New Roman';
 
-    lgHandles = [];
-    lgLabels  = {};
+    scale = 2;
+    xlim(ax,[-scale scale]);
+    ylim(ax,[-scale scale]);
+    zlim(ax,[-scale/4 scale/4]);
 
-    % --- draw facets ---
-    for k = 1:count
-        Uk   = U(:,:,k);
-        Vk   = Asys*Uk;
-        verts = Vk;
+    % ---------------- Draw AMS facets ----------------
+    nFacets = size(U,3);
+    for k = 1:nFacets
+        Vk = Asys * U(:,:,k);
 
-        A = verts(:,1)'; B = verts(:,2)'; C = verts(:,3)'; D = verts(:,4)';
-        tris = [A; B; C; D];
-        f    = [1 2 3 4];
+        verts = Vk.';
+        faces = [1 2 3 4];
 
-        isHighlighted = (k == facetIndex) && (ShowBasis || ShowProduced);
-
-        if isHighlighted
-            patch('Faces',f,'Vertices',tris, ...
-              'FaceColor','r','FaceAlpha',0.5, ...
-              'EdgeColor',EdgeColor,'EdgeAlpha',EdgeAlpha,'LineWidth',LineWidth, ...
-              'EdgeLighting','none','FaceLighting','flat','HandleVisibility','off');
-        else
-            patch('Faces',f,'Vertices',tris, ...
-              'FaceColor',FaceColor,'FaceAlpha',FaceAlpha, ...
-              'EdgeColor',EdgeColor,'EdgeAlpha',EdgeAlpha,'LineWidth',LineWidth, ...
-              'EdgeLighting','none','FaceLighting','flat','HandleVisibility','off');
-        end
-
-        % highlight edges of selected facet
-        if isHighlighted
-            outline = [A;B;C;D;A];
-            for i = 1:4
-                plot3(outline(i:i+1,1),outline(i:i+1,2),outline(i:i+1,3), ...
-                      'Color',[0,i*0.24,0], ...
-                      'LineWidth',LineWidth,'LineJoin','round');
-            end
-        end
-
+        patch(ax, ...
+            'Faces',faces, ...
+            'Vertices',verts, ...
+            'FaceColor',FaceColor, ...
+            'FaceAlpha',FaceAlpha, ...
+            'EdgeColor',EdgeColor, ...
+            'LineWidth',LineWidth, ...
+            'HandleVisibility','off');
     end
 
-    % --- produced / desired wrenches ---
+
+    % ---------------- Produced / desired ----------------
+    origin = [0 0 0];
+
     if ShowProduced
-        hProd = quiver3(center(1),center(2),center(3), ...
-                        aProduced(1), aProduced(2), aProduced(3), ...
-                        'AutoScale','off','Color','b', ...
-                        'LineWidth',1.5,'MaxHeadSize',0.8);
-        lgHandles(end+1) = hProd;
-        lgLabels{end+1}  = 'Moment produced';
+        quiver3(ax, origin(1),origin(2),origin(3), ...
+            aProduced(1),aProduced(2),aProduced(3), ...
+            'Color','b','LineWidth',1.2,'AutoScale','off');
     end
 
     if ShowDesired
-        hDes = quiver3(center(1),center(2),center(3), ...
-                       ad(1), ad(2), ad(3), ...
-                       'AutoScale','off','Color','r', ...
-                       'LineWidth',2,'MaxHeadSize',0.8);
-        lgHandles(end+1) = hDes;
-        lgLabels{end+1}  = 'Desired moment';
+        quiver3(ax, origin(1),origin(2),origin(3), ...
+            ad(1),ad(2),ad(3), ...
+            'Color','r','LineWidth',1.5,'AutoScale','off');
     end
 
-    % --- basis vectors for selected facet ---
-    if ShowBasis
-        Vi  = Asys*U(:,:,facetIndex);
+    % ---------------- Optional basis vectors ----------------
+    if ShowBasis && ~isempty(U)
+        Vi = Asys * U(:,:,1);
         adi = Vi(:,1);
         adj = Vi(:,2);
         adk = Vi(:,4);
 
-        a = abc(1); b = abc(2); c = abc(3);
-
-        M  = [adi, b*(adj-adi), c*(adk-adi)];
-        M2 = [adi-center' adj adk];
-
-        for n = 1:3
-            h1 = quiver3(center(1),center(2),center(3), ...
-                         M2(1,n), M2(2,n), M2(3,n), ...
-                         'AutoScale','off','Color',[0,n*0.33,n*0.33], ...
-                         'LineWidth',1.5,'MaxHeadSize',0.8);
-            h2 = quiver3(adi(1),adi(2),adi(3), ...
-                         M(1,n), M(2,n), M(3,n), ...
-                         'AutoScale','off','Color',[1,0.22,0], ...
-                         'LineWidth',1.5,'MaxHeadSize',0.8);
-
-            if n == 3
-                lgHandles(end+1) = h1;
-                lgLabels{end+1}  = 'adi adj adk';
-                lgHandles(end+1) = h2;
-                lgLabels{end+1}  = 'Facet basis vectors';
-            end
-        end
+        quiver3(ax,0,0,0,adi(1),adi(2),adi(3),'Color',[0 0.6 0],'LineWidth',1.2);
+        quiver3(ax,0,0,0,adj(1),adj(2),adj(3),'Color',[0 0.3 0.7],'LineWidth',1.2);
+        quiver3(ax,0,0,0,adk(1),adk(2),adk(3),'Color',[0.7 0.3 0],'LineWidth',1.2);
     end
 
-    % --- axes / labels / legend ---
-    box on; grid on;
-    ax = gca;
-    ax.GridColor     = GridColor;
-    ax.GridAlpha     = GridAlpha;
-    ax.GridLineStyle = GridStyle;
-    ax.XMinorGrid    = 'off';
-    ax.YMinorGrid    = 'off';
-    ax.ZMinorGrid    = 'off';
-    ax.FontSize      = FontSize;
-    ax.LineWidth     = LineWidth;
-    ax.Color         = 0.1*[1 1 1];
-    ax.Projection    = 'perspective';
-    ax.XColor        = GridColor;
-    ax.YColor        = GridColor;
-    ax.ZColor        = GridColor;
+        
+    ShowConstraint = true;
 
-    xlabel('F_x (N)','Interpreter','tex');
-    ylabel('F_y (N)','Interpreter','tex');
-    zlabel('T_z (N·m)','Interpreter','tex');
-    title('Attainable Moment Set','Color',GridColor);
+    if ShowConstraint && ~isempty(abc) && all(isfinite(abc(:))) && all(abs(abc(:)) > 1e-12)
+        Fx_cap  = abs(abc(1));
+        Fy_cap  = abs(abc(2));
+        Tau_cap = abs(abc(3));
 
-    if ~isempty(lgHandles)
-        legend(lgHandles, lgLabels{:});
+        % resolution of the surface
+        nE = 40;
+
+        % make a unit sphere then scale it into an ellipsoid
+        [Xs, Ys, Zs] = sphere(nE);
+        Xe = Fx_cap  * Xs;
+        Ye = Fy_cap  * Ys;
+        Ze = Tau_cap * Zs;
+
+        % draw ellipsoid surface
+        surf(ax, Xe, Ye, Ze, ...
+            'FaceColor','r', ...
+            'EdgeColor','r', ...
+            'FaceAlpha',0.12, ...
+            'EdgeAlpha',0.12, ...
+            'LineWidth',0.5, ...
+            'HandleVisibility','off');
+
     end
+    % ---------------- Labels ----------------
+    ax.FontSize = FontSize;
+    xlabel(ax,'F_x (N)');
+    ylabel(ax,'F_y (N)');
+    zlabel(ax,'\tau_z (N\cdot m)');
+    title('Attainable Moment Set (AMS)', 'color', EdgeColor);
 
-    % only export pdf in export mode
+    lgd = legend(ax, ...
+        [hSimplified, hTrue], ...
+        {'Simplified AMS bounds', 'True AMS'}, ...
+        'Location','northoutside', ...
+        'Orientation','horizontal');
+
+    lgd.Box = 'off';
+    lgd.TextColor = 0.3*[1 1 1];
+    lgd.FontSize = 15;
+    lgd.ItemTokenSize = [30 20]; 
+    lgd.Location = "southoutside";
+    % Manual positioning (normalized figure units)
+    lgd.Units = 'normalized';
+    pos = lgd.Position;
+    pos(2) = pos(2) + 0.075;   % move DOWN (reduce gap)
+    lgd.Position = pos;
+
+
+    legend off
+    grid(ax,'on');
+    box(ax,'on');
+
+    % ---------------- Export only if asked ----------------
     if doExport
-        exportgraphics(gcf, 'AMS.pdf', 'ContentType','vector','Padding',5);
+        exportgraphics(ax,'AMS.pdf','ContentType','vector');
     end
 end

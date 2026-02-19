@@ -11,9 +11,9 @@ uCache = buildAllAMS(cfg0);
 % --- run simulation ---
 
 
-[xHist, adHist, uHist,aRealHist, t] = simulateSlider(cfg0,uCache,failureTime);
+%[xHist, adHist, uHist,aRealHist, t] = simulateSlider(cfg0,uCache,failureTime);
 %Visualizion
-if 1
+if 0
 
     animateTrajectory(t,xHist,uHist,cfg0,failureTime);
     

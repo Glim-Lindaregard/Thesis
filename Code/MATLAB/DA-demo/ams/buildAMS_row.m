@@ -1,7 +1,7 @@
 function U = buildAMS_row(cfg)
 
 A = cfg.A; umin = cfg.u_min; umax = cfg.u_max;
-N = cfg.N_thrusters;  t = 0; tol = 1e-15;
+N = cfg.N_thrusters;  t = 0; tol = 1e-10 * max(1, norm(A,'fro'));
 
 
 maxFacets = N* (N-1); % Conservative estimate
@@ -39,10 +39,26 @@ for i = 1:N-1
         [A1, dropRow] = bestSubMatrix(Asub);  %Find the best conditioned 2x2 sub of Asub. 
         A2 = Asub(dropRow,:)';
     
-        %Create normal vector
+        %Create normal vector (ROBUST)
         n = zeros(3,1);
-        n(setdiff(1:3,dropRow)) = -A1 \ A2;
+        
+        keep = setdiff(1:3, dropRow);
+        
+        % Robustness guard: skip ill-conditioned 2x2 solves
+        rc = rcond(A1);
+        if ~isfinite(rc) || rc < 1e-12
+            continue
+        end
+        
+        x = -A1 \ A2;      % 2x1
+        n(keep) = x;
         n(dropRow) = 1;
+        
+        % Optional sanity
+        if any(~isfinite(n)) || norm(n) < 1e-12
+            continue
+        end
+
 
         
         n(abs(n) < tol) = 0;
@@ -69,11 +85,11 @@ for i = 1:N-1
         for which = 1:2
             %Calculate verteces
             if which == 1
-                %u = umin; u(s>0)=umax(s>0); u(s<0)=umin(s<0);
-                u = umin; u(s == 1)=umax(s == 1); u(s == -1)=umin(s == -1);
+                u = umin; u(s>0)=umax(s>0); u(s<0)=umin(s<0);
+                %u = umin; u(s == 1)=umax(s == 1); u(s == -1)=umin(s == -1);
             else
-                %u = umin; u(s>0)=umin(s>0); u(s<0)=umax(s<0);
-                u = umin; u(s == 1)=umin(s == 1); u(s == -1)=umax(s == -1);
+                u = umin; u(s>0)=umin(s>0); u(s<0)=umax(s<0);
+                %u = umin; u(s == 1)=umin(s == 1); u(s == -1)=umax(s == -1);
             end
             u1=u; u2=u; u3=u; u4=u;
             u1(i)=umin(i); u1(j)=umin(j);

@@ -49,9 +49,26 @@ function visualizeAMSGrid(uCache, failureTime, opts, aProduced, ad)
     % --- Precompute global axes from all scenarios for consistency ---
     allXYZ = [];   % collect all vertices across panels
     panels = cell(1,S);  % hold panel data (U,A) to avoid double indexing later
+    Tcache4 = ...
+    [
+    1 0 0 0 0 1 1 1;
+    0 1 0 0 1 1 0 1;
+    1 0 1 1 0 1 0 0;
+    0 1 0 0 0 1 1 1;
+    1 1 0 0 0 1 1 0;
+    1 0 0 1 0 1 0 0;
+    0 0 1 0 0 1 1 1;
+    1 1 0 0 1 1 0 0;
+    0 1 0 1 0 1 0 1;
+    0 0 0 1 0 1 1 1;
+    1 0 0 1 0 1 1 0;
+    0 0 1 1 0 1 0 1;
+    0 0 0 0 1 1 1 1;
+    0 1 1 0 0 1 1 0;
+    ];
 
     for s = 1:S
-        k = idx(s);
+        k = Tcache4(s,:);
         entry = uCache(k);
         panels{s}.U = entry.U;   % m×4×F
         panels{s}.A = entry.A;   % 3×m
